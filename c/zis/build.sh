@@ -20,10 +20,13 @@ LDFLAGS=(-V -b ac=1 -b rent -b case=mixed -b map -b xref -b reus)
 
 xlc "${CFLAGS[@]}" \
 $COMMON/c/alloc.c \
+$COMMON/c/cmutils.c \
 $COMMON/c/collections.c \
 $COMMON/c/crossmemory.c \
+$COMMON/c/isgenq.c \
 $COMMON/c/le.c \
 $COMMON/c/logging.c \
+$COMMON/c/lpa.c \
 $COMMON/c/metalio.c \
 $COMMON/c/mtlskt.c \
 $COMMON/c/nametoken.c \
@@ -44,10 +47,13 @@ services/nwm.c \
 services/snarfer.c
 
 as "${ASFLAGS[@]}" -aegimrsx=alloc.asm alloc.s
+as "${ASFLAGS[@]}" -aegimrsx=cmutils.asm cmutils.s
 as "${ASFLAGS[@]}" -aegimrsx=collections.asm collections.s
 as "${ASFLAGS[@]}" -aegimrsx=crossmemory.asm crossmemory.s
+as "${ASFLAGS[@]}" -aegimrsx=isgenq.asm isgenq.s
 as "${ASFLAGS[@]}" -aegimrsx=le.asm le.s
 as "${ASFLAGS[@]}" -aegimrsx=logging.asm logging.s
+as "${ASFLAGS[@]}" -aegimrsx=lpa.asm lpa.s
 as "${ASFLAGS[@]}" -aegimrsx=metalio.asm metalio.s
 as "${ASFLAGS[@]}" -aegimrsx=mtlskt.asm mtlskt.s
 as "${ASFLAGS[@]}" -aegimrsx=nametoken.asm nametoken.s
@@ -74,10 +80,13 @@ export _LD_SYSLIB="//'SYS1.CSSLIB'://'CEE.SCEELKEX'://'CEE.SCEELKED'://'CEE.SCEE
 ld "${LDFLAGS[@]}" -e main \
 -o "//'$USER.DEV.LOADLIB(ZWESIS01)'" \
 alloc.o \
+cmutils.o \
 collections.o \
 crossmemory.o \
+isgenq.o \
 le.o \
 logging.o \
+lpa.o \
 metalio.o \
 mtlskt.o \
 nametoken.o \
