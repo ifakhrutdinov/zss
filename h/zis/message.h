@@ -77,6 +77,10 @@
 #define ZIS_LOG_CXMS_TERM_FAILURE_MSG_TEXT      "ZSS Cross-Memory Server terminated due to an error, status = %d"
 #define ZIS_LOG_CXMS_TERM_FAILURE_MSG           ZIS_LOG_CXMS_TERM_FAILURE_MSG_ID" "ZIS_LOG_CXMS_TERM_FAILURE_MSG_TEXT
 
+#define ZIS_LOG_TMP_DEV_MSG_ID                  ZIS_MSG_PRFX"0099X"
+#define ZIS_LOG_TMP_DEV_MSG_TEXT                ""
+#define ZIS_LOG_TMP_DEV_MSG                     ZIS_LOG_TMP_DEV_MSG_ID" "ZIS_LOG_TMP_DEV_MSG_TEXT
+
 #endif /* ZIS_MSG_H_ */
 
 

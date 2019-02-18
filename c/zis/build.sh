@@ -26,7 +26,7 @@ $COMMON/c/crossmemory.c \
 $COMMON/c/isgenq.c \
 $COMMON/c/le.c \
 $COMMON/c/logging.c \
-$COMMON/c/lpa.c \
+$COMMON/c/lpa.c -DLPA_LOG_DEBUG_MSG_ID='"ZIS00100I"' \
 $COMMON/c/metalio.c \
 $COMMON/c/mtlskt.c \
 $COMMON/c/nametoken.c \
@@ -41,7 +41,9 @@ $COMMON/c/utils.c \
 $COMMON/c/xlate.c \
 $COMMON/c/zvt.c \
 parm.c \
+plugin.c \
 server.c \
+service.c \
 services/auth.c \
 services/nwm.c \
 services/snarfer.c
@@ -69,7 +71,9 @@ as "${ASFLAGS[@]}" -aegimrsx=xlate.asm xlate.s
 as "${ASFLAGS[@]}" -aegimrsx=zvt.asm zvt.s
 
 as "${ASFLAGS[@]}" -aegimrsx=parm.asm parm.s
+as "${ASFLAGS[@]}" -aegimrsx=plugin.asm plugin.s
 as "${ASFLAGS[@]}" -aegimrsx=server.asm server.s
+as "${ASFLAGS[@]}" -aegimrsx=service.asm service.s
 
 as "${ASFLAGS[@]}" -aegimrsx=auth.asm auth.s
 as "${ASFLAGS[@]}" -aegimrsx=nwm.asm nwm.s
@@ -101,7 +105,9 @@ utils.o \
 xlate.o \
 zvt.o \
 parm.o \
+plugin.o \
 server.o \
+service.o \
 auth.o \
 nwm.o \
 snarfer.o \

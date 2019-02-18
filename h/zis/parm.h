@@ -1,15 +1,3 @@
-
-
-/*
-  This program and the accompanying materials are
-  made available under the terms of the Eclipse Public License v2.0 which accompanies
-  this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
-  
-  SPDX-License-Identifier: EPL-2.0
-  
-  Copyright Contributors to the Zowe Project.
-*/
-
 #ifndef ZIS_PARM_H_
 #define ZIS_PARM_H_
 
@@ -27,6 +15,7 @@
 #define RC_ZISPARM_SLH_NOT_CREATED          15
 #define RC_ZISPARM_SLH_ALLOC_FAILED         16
 #define RC_ZISPARM_CMS_CALL_FAILED          17
+#define RC_ZISPARM_ALLOC_FAILED             18
 
 #define ZIS_PARM_TEST_PARM_NAME   "TEST_ZIS_PARM"
 #define ZIS_PARM_TEST_PARM_VALUE  "THIS VALUE MUST BE AVAILABLE IN ANY SERVICE"
@@ -34,9 +23,11 @@
 #pragma map(zisMakeParmSet, "ZISMAKPS")
 #pragma map(zisRemoveParmSet, "ZISREMPS")
 #pragma map(zisReadParmlib, "ZISRDLIB")
+#pragma map(zisReadMainParms, "ZISRDMPR")
 #pragma map(zisPutParmValue, "ZISPUTPV")
 #pragma map(zisGetParmValue, "ZISGETPV")
-#pragma map(zisLoadParmsToServer, "ZISLOADP")
+#pragma map(zisLoadParmsToCMServer, "ZISLOADP")
+#pragma map(zisIterateParms, "ZISITERP")
 
 ZOWE_PRAGMA_PACK
 
@@ -60,6 +51,11 @@ typedef struct ZISParmStatus_tag {
   int internalRSN;
 } ZISParmStatus;
 
+typedef struct ZISMainFunctionParms_tag {
+  unsigned short textLength;
+  char text[0];
+} ZISMainFunctionParms;
+
 ZOWE_PRAGMA_PACK_RESET
 
 ZISParmSet *zisMakeParmSet();
@@ -69,23 +65,18 @@ void zisRemoveParmSet(ZISParmSet *parms);
 int zisReadParmlib(ZISParmSet *parms, const char *ddname, const char *member,
                    ZISParmStatus *status);
 
+int zisReadMainParms(ZISParmSet *parms, const ZISMainFunctionParms *mainParms);
+
 int zisPutParmValue(ZISParmSet *parms, const char *name, const char *value);
 
 const char *zisGetParmValue(const ZISParmSet *parms, const char *name);
 
-int zisLoadParmsToServer(CrossMemoryServer *server, const ZISParmSet *parms,
-                         int *reasonCode);
+int zisLoadParmsToCMServer(CrossMemoryServer *server, const ZISParmSet *parms,
+                           int *reasonCode);
+
+typedef void ZISParmVisitor(const char *name, const char *value, void *userData);
+
+void zisIterateParms(const ZISParmSet *parms, ZISParmVisitor *visitor,
+                     void *visitorData);
 
 #endif /* ZIS_PARM_H_ */
-
-
-/*
-  This program and the accompanying materials are
-  made available under the terms of the Eclipse Public License v2.0 which accompanies
-  this distribution, and is available at https://www.eclipse.org/legal/epl-v20.html
-  
-  SPDX-License-Identifier: EPL-2.0
-  
-  Copyright Contributors to the Zowe Project.
-*/
-
