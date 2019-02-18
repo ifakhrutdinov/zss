@@ -783,7 +783,7 @@ static int loadConfig(ZISContext *context,
   }
 
   int readMainParmsRC = zisReadMainParms(context->parms, mainParms);
-  if (readMainParmsRC != RC_ZIS_OK) {
+  if (readMainParmsRC != RC_ZISPARM_OK) {
     zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
             "Main parms not read, RC = %d", readMainParmsRC);
     return RC_ZIS_ERROR;
@@ -827,7 +827,7 @@ static int getCMSConfigFlags(const ZISParmSet *zisParms) {
     flags |= CMS_SERVER_FLAG_COLD_START;
   }
 
-  const char *debugValue = zisGetParmValue(zisParms, ZIS_PARM_COLD_START);
+  const char *debugValue = zisGetParmValue(zisParms, ZIS_PARM_DEBUG_MODE);
   if (coldStartValue && strlen(coldStartValue) == 0) {
     flags |= CMS_SERVER_FLAG_DEBUG;
   }
@@ -838,13 +838,14 @@ static int getCMSConfigFlags(const ZISParmSet *zisParms) {
 static CrossMemoryServerName getCMServerName(const ZISParmSet *zisParms) {
 
   CrossMemoryServerName serverName;
-
-  char serverNameBuffer[sizeof(serverName.nameSpacePadded) + 1];
-
   const char *serverNameNullTerm = NULL;
+
+  /* Check JCL parm */
+  serverNameNullTerm = zisGetParmValue(zisParms, ZIS_PARM_SERVER_NAME);
+
   if (serverNameNullTerm == NULL) {
-    serverNameNullTerm =
-        zisGetParmValue(zisParms, ZIS_PARMLIB_PARM_SERVER_NAME);
+    /* Check PARMLIB member if JCL one has not been found */
+    serverNameNullTerm = zisGetParmValue(zisParms, ZIS_PARMLIB_PARM_SERVER_NAME);
   }
 
   if (serverNameNullTerm != NULL) {

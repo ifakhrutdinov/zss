@@ -437,7 +437,6 @@ int zisReadMainParms(ZISParmSet *parms, const ZISMainFunctionParms *mainParms) {
         break;
       }
     }
-    startIdx = endIdx;
 
     char *key = workBuffer;
     char *value = NULL;
@@ -446,9 +445,9 @@ int zisReadMainParms(ZISParmSet *parms, const ZISMainFunctionParms *mainParms) {
     memcpy(key, &mainParms->text[startIdx], parmLength);
     key[parmLength] = '\0';
 
-    char *equalSign = strchr(workBuffer, '=');
+    char *equalSign = strchr(key, '=');
     if (equalSign != NULL) {
-      equalSign = '\0';
+      *equalSign = '\0';
       value = equalSign + 1;
     }
 
@@ -458,6 +457,7 @@ int zisReadMainParms(ZISParmSet *parms, const ZISMainFunctionParms *mainParms) {
       break;
     }
 
+    startIdx = endIdx;
   }
 
   safeFree(workBuffer, workBufferSize);
@@ -486,26 +486,38 @@ static ZISParmSetEntry *findEntry(ZISParmSet *parms, const char *name) {
 
 int zisPutParmValue(ZISParmSet *parms, const char *name, const char *value) {
 
-  ZISParmSetEntry *existingEntry = findEntry(parms, name);
-  if (existingEntry != NULL) {
-    existingEntry->value = value;
-    return RC_ZISPARM_OK;
+  ZISParmSetEntry *entry = findEntry(parms, name);
+  if (entry == NULL) {
+
+    entry = (ZISParmSetEntry *)SLHAlloc(parms->slh, sizeof(ZISParmSetEntry));
+    if (entry == NULL) {
+      return RC_ZISPARM_SLH_ALLOC_FAILED;
+    }
+
+    memset(entry, 0, sizeof(ZISParmSetEntry));
+    memcpy(entry->eyecatcher, ZIS_PARMSET_ENTRY_EYECATCHER,
+           sizeof(entry->eyecatcher));
+
+    entry->next = parms->firstEntry;
+    parms->firstEntry = entry;
+
   }
 
-  ZISParmSetEntry *newParmEntry =
-      (ZISParmSetEntry *)SLHAlloc(parms->slh, sizeof(ZISParmSetEntry));
-  if (newParmEntry == NULL) {
+  if (entry->key == NULL) {
+    size_t parmLength = strlen(name);
+    entry->key = SLHAlloc(parms->slh, parmLength + 1);
+    if (entry->key == NULL) {
+      return RC_ZISPARM_SLH_ALLOC_FAILED;
+    }
+    strcat(entry->key, name);
+  }
+
+  size_t valueLength = strlen(value);
+  entry->value = SLHAlloc(parms->slh, valueLength + 1);
+  if (entry->value == NULL) {
     return RC_ZISPARM_SLH_ALLOC_FAILED;
   }
-
-  memset(newParmEntry, 0, sizeof(ZISParmSetEntry));
-  memcpy(newParmEntry->eyecatcher, ZIS_PARMSET_ENTRY_EYECATCHER,
-         sizeof(newParmEntry->eyecatcher));
-  newParmEntry->key = name;
-  newParmEntry->value = value;
-
-  newParmEntry->next = parms->firstEntry;
-  parms->firstEntry = newParmEntry;
+  strcat(entry->value, value);
 
   return RC_ZISPARM_OK;
 }

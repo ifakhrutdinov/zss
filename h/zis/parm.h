@@ -35,8 +35,8 @@ typedef struct ZISParmSetEntry_tag {
   char eyecatcher[8];
 #define ZIS_PARMSET_ENTRY_EYECATCHER  "RSZISPSE"
   struct ZISParmSetEntry_tag *next;
-  const char *key;
-  const char *value;
+  char *key;
+  char *value;
 } ZISParmSetEntry;
 
 typedef struct ZISParmSet_tag {
