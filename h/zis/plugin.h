@@ -29,6 +29,11 @@ typedef int (ZISPuginInitFunction)(struct ZISContext_tag *context,
 typedef int (ZISPuginTermFunction)(struct ZISContext_tag *context,
                                    ZISPlugin *plugin,
                                    ZISPluginAnchor *anchor);
+typedef int (ZISPuginModifyCommandFunction)(struct ZISContext_tag *context,
+                                            ZISPlugin *plugin,
+                                            ZISPluginAnchor *anchor,
+                                            const CMSModifyCommand *command,
+                                            CMSModifyCommandStatus *status);
 
 ZOWE_PRAGMA_PACK
 
@@ -84,6 +89,7 @@ struct ZISPlugin_tag {
   ZISPluginName name;
   PAD_LONG(2, ZISPuginInitFunction *init);
   PAD_LONG(3, ZISPuginTermFunction *term);
+  PAD_LONG(4, ZISPuginModifyCommandFunction *handleCommand);
 
   unsigned int serviceCount;
   ZISService services[0];
@@ -100,7 +106,11 @@ typedef ZISPlugin *(ZISPluginDescriptorFunction)();
 #pragma map(zisCreatePluginAnchor, "ZISPLGCA")
 #pragma map(zisRemovePluginAnchor, "ZISPLGRM")
 
-ZISPlugin *zisCreatePlugin(ZISPluginName name, unsigned int serviceCount,
+ZISPlugin *zisCreatePlugin(ZISPluginName name,
+                           ZISPuginInitFunction *initFunction,
+                           ZISPuginInitFunction *termFunction,
+                           ZISPuginModifyCommandFunction *commandFunction,
+                           unsigned int serviceCount,
                            int flags);
 
 void zisDestroyPlugin(ZISPlugin *plugin);
@@ -111,6 +121,7 @@ ZISPluginAnchor *zisCreatePluginAnchor();
 void zisRemovePluginAnchor(ZISPluginAnchor *anchor);
 
 #define RC_ZIS_PLUGIN_OK                  0
+#define RC_ZIS_PLUGIN_COMMAND_NOT_HADNLED 2
 #define RC_ZIS_PLUGIN_SEVICE_TABLE_FULL   8
 
 #endif /* ZIS_PLUGIN_H_ */

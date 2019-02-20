@@ -22,7 +22,11 @@
 #include "zis/plugin.h"
 #include "zis/service.h"
 
-ZISPlugin *zisCreatePlugin(ZISPluginName name, unsigned int serviceCount,
+ZISPlugin *zisCreatePlugin(ZISPluginName name,
+                           ZISPuginInitFunction *initFunction,
+                           ZISPuginInitFunction *termFunction,
+                           ZISPuginModifyCommandFunction *commandFunction,
+                           unsigned int serviceCount,
                            int flags) {
 
   unsigned int requiredSize = sizeof(ZISPlugin) +
@@ -40,6 +44,10 @@ ZISPlugin *zisCreatePlugin(ZISPluginName name, unsigned int serviceCount,
   plugin->flags = flags;
   plugin->maxServiceCount = serviceCount;
   plugin->name = name;
+
+  plugin->init = initFunction;
+  plugin->term = termFunction;
+  plugin->handleCommand = commandFunction;
 
   return plugin;
 }

@@ -24,6 +24,7 @@
 ZISService zisCreateService(ZISServiceName name, int flags,
                             ZISServiceInitFunction *initFunction,
                             ZISServiceTermFunction *termFunction,
+                            ZISServiceModifyCommandFunction *commandFunction,
                             ZISServiceServeFunction *serveFunction) {
 
   ZISService service = {
@@ -33,6 +34,7 @@ ZISService zisCreateService(ZISServiceName name, int flags,
       .name = name,
       .init = initFunction,
       .term = termFunction,
+      .handleCommand = commandFunction,
       .serve = serveFunction,
   };
 
@@ -43,11 +45,13 @@ ZISService zisCreateSpaceSwitchService(
     ZISServiceName name,
     ZISServiceInitFunction *initFunction,
     ZISServiceTermFunction *termFunction,
+    ZISServiceModifyCommandFunction *commandFunction,
     ZISServiceServeFunction *serveFunction
 ) {
 
   return zisCreateService(name, ZIS_SERVICE_FLAG_SPACE_SWITCH,
-                          initFunction, termFunction, serveFunction);
+                          initFunction, termFunction, commandFunction,
+                          serveFunction);
 
 }
 
@@ -55,11 +59,13 @@ ZISService zisCreateCurrentPrimaryService(
     ZISServiceName name,
     ZISServiceInitFunction *initFunction,
     ZISServiceTermFunction *termFunction,
+    ZISServiceModifyCommandFunction *commandFunction,
     ZISServiceServeFunction *serveFunction
 ) {
 
   return zisCreateService(name, ZIS_SERVICE_FLAG_NONE,
-                          initFunction, termFunction, serveFunction);
+                          initFunction, termFunction, commandFunction,
+                          serveFunction);
 
 
 }

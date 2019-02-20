@@ -722,7 +722,7 @@ static int initServer(CrossMemoryServerGlobalArea *ga, void *userData) {
   cleanPlugins(cntx);
   deployPlugins(cntx);
 
-  return RC_ZIS_OK;
+  return RC_CMS_OK;
 }
 
 static int cleanupServer(CrossMemoryServerGlobalArea *ga, void *userData) {
@@ -733,7 +733,38 @@ static int cleanupServer(CrossMemoryServerGlobalArea *ga, void *userData) {
 
   destroyServiceTable(context);
 
-  return RC_ZIS_OK;
+  return RC_CMS_OK;
+}
+
+static int handleModifyCommands(CrossMemoryServerGlobalArea *globalArea,
+                                const CMSModifyCommand *command,
+                                CMSModifyCommandStatus *status,
+                                void *userData) {
+
+  ZISContext *context = userData;
+
+  ZISPlugin *currPlugin = context->firstPlugin;
+  while (currPlugin != NULL) {
+
+    for (unsigned int i = 0; i < currPlugin->serviceCount; i++) {
+      ZISService *currService = &currPlugin->services[i];
+
+      if (currService->handleCommand != NULL) {
+        currService->handleCommand(context, currService, currService->anchor,
+                                   command, status);
+      }
+
+    }
+
+    if (currPlugin->handleCommand != NULL) {
+      currPlugin->handleCommand(context, currPlugin, currPlugin->anchor,
+                                command, status);
+    }
+
+    currPlugin = currPlugin->next;
+  }
+
+  return RC_CMS_OK;
 }
 
 typedef struct PARMBLIBMember_tag {
@@ -871,6 +902,7 @@ static int initCoreServer(ZISContext *context) {
                                                        cmsFlags,
                                                        initServer,
                                                        cleanupServer,
+                                                       handleModifyCommands,
                                                        context,
                                                        &makeServerRSN);
   if (cmServer == NULL) {

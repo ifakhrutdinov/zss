@@ -27,6 +27,11 @@ typedef int (ZISServiceInitFunction)(struct ZISContext_tag *context,
 typedef int (ZISServiceTermFunction)(struct ZISContext_tag *context,
                                      ZISService *service,
                                      ZISServiceAnchor *anchor);
+typedef int (ZISServiceModifyCommandFunction)(struct ZISContext_tag *context,
+                                              ZISService *service,
+                                              ZISServiceAnchor *anchor,
+                                              const CMSModifyCommand *command,
+                                              CMSModifyCommandStatus *status);
 typedef int (ZISServiceServeFunction)(const CrossMemoryServerGlobalArea *ga,
                                       ZISServiceAnchor *anchor,
                                       ZISServiceData *data,
@@ -88,7 +93,8 @@ struct ZISService_tag {
 
   PAD_LONG(1, ZISServiceInitFunction *init);
   PAD_LONG(2, ZISServiceTermFunction *term);
-  PAD_LONG(3, ZISServiceServeFunction *serve);
+  PAD_LONG(3, ZISServiceModifyCommandFunction *handleCommand);
+  PAD_LONG(4, ZISServiceServeFunction *serve);
 
 };
 
@@ -104,12 +110,14 @@ ZOWE_PRAGMA_PACK_RESET
 ZISService zisCreateService(ZISServiceName name, int flags,
                             ZISServiceInitFunction *initFunction,
                             ZISServiceTermFunction *termFunction,
+                            ZISServiceModifyCommandFunction *commandFunction,
                             ZISServiceServeFunction *serveFunction);
 
 ZISService zisCreateSpaceSwitchService(
     ZISServiceName name,
     ZISServiceInitFunction *initFunction,
     ZISServiceTermFunction *termFunction,
+    ZISServiceModifyCommandFunction *commandFunction,
     ZISServiceServeFunction *serveFunction
 );
 
@@ -117,6 +125,7 @@ ZISService zisCreateCurrentPrimaryService(
     ZISServiceName name,
     ZISServiceInitFunction *initFunction,
     ZISServiceTermFunction *termFunction,
+    ZISServiceModifyCommandFunction *commandFunction,
     ZISServiceServeFunction *serveFunction
 );
 
