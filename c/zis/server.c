@@ -752,6 +752,9 @@ static int handleModifyCommands(CrossMemoryServerGlobalArea *globalArea,
       if (currService->handleCommand != NULL) {
         currService->handleCommand(context, currService, currService->anchor,
                                    command, status);
+        if (*status == CMS_MODIFY_COMMAND_STATUS_CONSUMED) {
+          return RC_CMS_OK;
+        }
       }
 
     }
@@ -759,6 +762,9 @@ static int handleModifyCommands(CrossMemoryServerGlobalArea *globalArea,
     if (currPlugin->handleCommand != NULL) {
       currPlugin->handleCommand(context, currPlugin, currPlugin->anchor,
                                 command, status);
+      if (*status == CMS_MODIFY_COMMAND_STATUS_CONSUMED) {
+        return RC_CMS_OK;
+      }
     }
 
     currPlugin = currPlugin->next;

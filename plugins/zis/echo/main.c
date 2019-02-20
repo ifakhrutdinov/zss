@@ -55,7 +55,7 @@ static int handleCommands(struct ZISContext_tag *context,
                           const CMSModifyCommand *command,
                           CMSModifyCommandStatus *status) {
 
-  if (command->commandVerb != NULL) {
+  if (command->commandVerb == NULL) {
     return RC_ZIS_PLUGIN_OK;
   }
 
@@ -76,7 +76,7 @@ static int handleCommands(struct ZISContext_tag *context,
                 "Echo plug-in v%d - anchor = 0x%p, init TOD = %16.16llX\n",
                 plugin->version, anchor, pluginData->initTime);
 
-      *status = CMS_MODIFY_COMMAND_STATUS_PROCESSED;
+      *status = CMS_MODIFY_COMMAND_STATUS_CONSUMED;
     }
 
   }
