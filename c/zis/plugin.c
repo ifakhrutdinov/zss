@@ -26,6 +26,7 @@ ZISPlugin *zisCreatePlugin(ZISPluginName name,
                            ZISPuginInitFunction *initFunction,
                            ZISPuginInitFunction *termFunction,
                            ZISPuginModifyCommandFunction *commandFunction,
+                           unsigned int version,
                            unsigned int serviceCount,
                            int flags) {
 
@@ -48,6 +49,8 @@ ZISPlugin *zisCreatePlugin(ZISPluginName name,
   plugin->init = initFunction;
   plugin->term = termFunction;
   plugin->handleCommand = commandFunction;
+
+  plugin->pluginVersion = version;
 
   return plugin;
 }
@@ -88,6 +91,7 @@ ZISPluginAnchor *zisCreatePluginAnchor(const ZISPlugin *plugin) {
   anchor->size = size;
 
   anchor->name = plugin->name;
+  anchor->pluginVersion = plugin->pluginVersion;
 
   return anchor;
 }

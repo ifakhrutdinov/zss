@@ -223,18 +223,6 @@ static int cleanPluginAnchor(ZISPluginAnchor *anchor) {
     currService = currService->next;
   }
 
-  if (anchor->flags & ZIS_PLUGIN_ANCHOR_FLAG_LPA) {
-    int lpaRSN = 0;
-    int lpaRC = lpaDelete(&anchor->moduleInfo, &lpaRSN);
-    if (lpaRC != 0) {
-      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-              "Plugin module \'%8.8s\' not deleted from LPA, RC = %d, RSN = %d",
-              anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
-    }
-    memset(&anchor->moduleInfo, 0, sizeof(anchor->moduleInfo));
-    anchor->flags &= ~ZIS_PLUGIN_ANCHOR_FLAG_LPA;
-  }
-
   return RC_ZIS_OK;
 }
 
@@ -298,6 +286,78 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
   return RC_ZIS_OK;
 }
 
+static int relocatePluginToLPAIfNeeded(ZISPlugin* plugin,
+                                       ZISPluginAnchor* anchor,
+                                       EightCharString moduleName) {
+
+  bool lpaNeeded = plugin->flags & ZIS_PLUGIN_FLAG_LPA ? true : false;
+  bool lpaPresent = anchor->flags & ZIS_PLUGIN_ANCHOR_FLAG_LPA ? true : false;
+
+  if (lpaPresent) {
+
+    if (anchor->pluginVersion != plugin->pluginVersion) {
+
+      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
+              ZIS_LOG_TMP_DEV_MSG"Plugin '%16.16s' version %u doesn't match "
+              "anchor version %u, LPA module discarded",
+              plugin->name.text, plugin->pluginVersion, anchor->pluginVersion);
+      zowedump(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
+               (char *)&anchor->moduleInfo, sizeof(LPMEA));
+
+#ifdef ZIS_LPA_DEV_MODE
+
+      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_INFO, CMS_LOG_DEBUG_MSG_ID
+              " Plugin LPA dev mode enabled, issuing CSVDYLPA DELETE\n");
+
+      int lpaRSN = 0;
+      int lpaRC = lpaDelete(&anchor->moduleInfo, &lpaRSN);
+      if (lpaRC != 0) {
+        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
+                "Plugin module \'%8.8s\' not deleted from LPA, RC = %d, RSN = %d",
+                anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
+      }
+#endif
+      memset(&anchor->moduleInfo, 0, sizeof(anchor->moduleInfo));
+      anchor->flags &= ~ZIS_PLUGIN_ANCHOR_FLAG_LPA;
+      lpaPresent = false;
+    }  else {
+      lpaPresent = true;
+    }
+
+  }
+
+  /* Check if LPA, and load if needed */
+  if (lpaNeeded) {
+
+    if (!lpaPresent) {
+
+      EightCharString ddname = {"STEPLIB "};
+      int lpaRSN = 0;
+      int lpaRC = lpaAdd(&anchor->moduleInfo, &ddname, &moduleName, &lpaRSN);
+      if (lpaRC != 0) {
+        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
+                "Plugin module \'%8.8s\' not added to LPA, RC = %d, RSN = %d",
+                anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
+        return RC_ZIS_ERROR;
+      }
+
+      anchor->flags |= ZIS_PLUGIN_ANCHOR_FLAG_LPA;
+    }
+
+    /* Invoke EP to get relocated services */
+    LPMEA *lpaInfo = &anchor->moduleInfo;
+    void *ep =
+        *(void * __ptr32 *)&lpaInfo->outputInfo.stuff.successInfo.entryPointAddr;
+    ZISPluginDescriptorFunction *getPluginDescriptor =
+        (ZISPluginDescriptorFunction *)((int)ep & 0xFFFFFFFE);
+
+    *plugin = *getPluginDescriptor();
+
+  }
+
+  return RC_ZIS_OK;
+}
+
 static int installPlugin(ZISContext *context, ZISPlugin *plugin,
                          EightCharString moduleName) {
 
@@ -313,35 +373,18 @@ static int installPlugin(ZISContext *context, ZISPlugin *plugin,
     context->zisAnchor->firstPlugin = anchor;
   }
 
-  /* Check if LPA, and load if needed */
-  if (plugin->flags & ZIS_PLUGIN_FLAG_LPA) {
-
-    EightCharString ddname = {"STEPLIB "};
-
-    int lpaRSN = 0;
-    int lpaRC = lpaAdd(&anchor->moduleInfo, &ddname, &moduleName, &lpaRSN);
-    if (lpaRC != 0) {
-      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-              "Plugin module \'%8.8s\' not added to LPA, RC = %d, RSN = %d",
-              anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
-      return RC_ZIS_ERROR;
-    }
-    anchor->flags |= ZIS_PLUGIN_ANCHOR_FLAG_LPA;
-
-    /* Invoke EP to get relocated services */
-    LPMEA *lpaInfo = &anchor->moduleInfo;
-    void *ep =
-        *(void * __ptr32 *)&lpaInfo->outputInfo.stuff.successInfo.entryPointAddr;
-    ZISPluginDescriptorFunction *getPluginDescriptor =
-        (ZISPluginDescriptorFunction *)((int)ep & 0xFFFFFFFE);
-    plugin = getPluginDescriptor();
-
+  int relocateRC = relocatePluginToLPAIfNeeded(plugin, anchor, moduleName);
+  if (relocateRC != RC_ZIS_OK) {
+    return relocateRC;
   }
 
   /* Save plugin definition for later use by server. */
   plugin->next = context->firstPlugin;
   context->firstPlugin = plugin;
   plugin->anchor = anchor;
+
+  /* Update anchor */
+  anchor->pluginVersion = plugin->pluginVersion;
 
   /* Plugin init call. */
   if (plugin->init != NULL) {

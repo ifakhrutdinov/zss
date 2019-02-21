@@ -67,7 +67,9 @@ struct ZISPluginAnchor_tag {
 
   ZISPluginData pluginData;
 
-  char reserved1[96];
+  unsigned int pluginVersion;
+
+  char reserved1[92];
 
 };
 
@@ -91,6 +93,7 @@ struct ZISPlugin_tag {
   PAD_LONG(3, ZISPuginTermFunction *term);
   PAD_LONG(4, ZISPuginModifyCommandFunction *handleCommand);
 
+  unsigned int pluginVersion;
   unsigned int serviceCount;
   ZISService services[0];
 
@@ -110,6 +113,7 @@ ZISPlugin *zisCreatePlugin(ZISPluginName name,
                            ZISPuginInitFunction *initFunction,
                            ZISPuginInitFunction *termFunction,
                            ZISPuginModifyCommandFunction *commandFunction,
+                           unsigned int verison,
                            unsigned int serviceCount,
                            int flags);
 
