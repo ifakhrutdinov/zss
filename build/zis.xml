@@ -24,6 +24,7 @@
       <arg line="-S -M -qmetal -q64 -DSUBPOOL=132 -DMETTLE=1"/>
       <arg value="-DMSGPREFIX=&quot;ZWE&quot;"/>
       <arg value="-DCMS_LPA_DEV_MODE"/> <!-- TODO remove this before the PR!!! -->
+      <arg value="-DZIS_LPA_DEV_MODE"/> <!-- TODO remove this before the PR!!! -->
       <arg value="-qreserved_reg=r12"/>
       <arg value="-Wc,arch(8),agg,exp,list(),so(),off,xref,roconst,longname,lp64"/>
       <arg line="-I ${COMMON}/h"/>
