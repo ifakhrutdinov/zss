@@ -155,16 +155,22 @@ static int initServiceTable(ZISContext *context) {
   ZISServerAnchor *anchor = context->zisAnchor;
 
   if (anchor->serviceTable != NULL) {
+#ifdef ZIS_DEV_MODE
     removeCrossMemoryMap(&anchor->serviceTable);
+#endif
   }
 
-  anchor->serviceTable = makeCrossMemoryMap(sizeof(ZISServicePath));
   if (anchor->serviceTable == NULL) {
-    if (anchor == NULL) {
-      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
-              "Service table not created");
-      return RC_ZIS_ERROR;
+
+    anchor->serviceTable = makeCrossMemoryMap(sizeof(ZISServicePath));
+    if (anchor->serviceTable == NULL) {
+      if (anchor == NULL) {
+        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
+                "Service table not created");
+        return RC_ZIS_ERROR;
+      }
     }
+
   }
 
   return RC_ZIS_OK;
@@ -271,7 +277,10 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
       }
     }
 
-    if (crossMemoryMapPut(serviceTable, &anchor->path, anchor) == -1) {
+    int putRC = crossMemoryMapPut(serviceTable, &anchor->path, anchor);
+    if (putRC == 1) {
+      *crossMemoryMapGetHandle(serviceTable, &anchor->path) = anchor;
+    } else if (putRC == -1) {
       zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
               "Service not registered in lookup table");
       return RC_ZIS_ERROR;
@@ -630,7 +639,7 @@ static void removeZISServerAnchor(ZISServerAnchor **anchor) {
   int subpool = CROSS_MEMORY_SERVER_SUBPOOL;
   int key = CROSS_MEMORY_SERVER_KEY;
 
-  cmFree2(anchor, size, subpool, key);
+  cmFree2((void **)anchor, size, subpool, key);
 
 }
 
@@ -771,7 +780,9 @@ static int cleanupServer(CrossMemoryServerGlobalArea *ga, void *userData) {
 
   terminatePlugins(context);
 
+#ifdef ZIS_DEV_MODE
   destroyServiceTable(context);
+#endif
 
   return RC_CMS_OK;
 }
