@@ -122,7 +122,7 @@ void zisDestroyPlugin(ZISPlugin *plugin);
 int zisPluginAddService(ZISPlugin *plugin, ZISService service);
 
 ZISPluginAnchor *zisCreatePluginAnchor();
-void zisRemovePluginAnchor(ZISPluginAnchor *anchor);
+void zisRemovePluginAnchor(ZISPluginAnchor **anchor);
 
 #define RC_ZIS_PLUGIN_OK                  0
 #define RC_ZIS_PLUGIN_COMMAND_NOT_HADNLED 2

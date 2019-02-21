@@ -155,8 +155,7 @@ static int initServiceTable(ZISContext *context) {
   ZISServerAnchor *anchor = context->zisAnchor;
 
   if (anchor->serviceTable != NULL) {
-    removeCrossMemoryMap(anchor->serviceTable);
-    anchor->serviceTable = NULL;
+    removeCrossMemoryMap(&anchor->serviceTable);
   }
 
   anchor->serviceTable = makeCrossMemoryMap(sizeof(ZISServicePath));
@@ -176,9 +175,7 @@ static void destroyServiceTable(ZISContext *context) {
   ZISServerAnchor *anchor = context->zisAnchor;
 
   if (anchor != NULL && anchor->serviceTable != NULL) {
-    CrossMemoryMap *mapToRemove = anchor->serviceTable;
-    anchor->serviceTable = NULL;
-    removeCrossMemoryMap(mapToRemove);
+    removeCrossMemoryMap(&anchor->serviceTable);
   }
 
 }
@@ -627,13 +624,13 @@ ZISServerAnchor *createZISServerAnchor() {
   return anchor;
 }
 
-static void removeZISServerAnchor(ZISServerAnchor *anchor) {
+static void removeZISServerAnchor(ZISServerAnchor **anchor) {
 
   unsigned int size = sizeof(ZISServerAnchor);
   int subpool = CROSS_MEMORY_SERVER_SUBPOOL;
   int key = CROSS_MEMORY_SERVER_KEY;
 
-  cmFree(anchor, size, subpool, key);
+  cmFree2(anchor, size, subpool, key);
 
 }
 

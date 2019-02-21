@@ -133,7 +133,7 @@ struct ZISPlugin_tag;
 
 ZISServiceAnchor *zisCreateServiceAnchor(const struct ZISPlugin_tag *plugin,
                                          const ZISService *service);
-void zisRemoveServiceAnchor(ZISServiceAnchor *anchor);
+void zisRemoveServiceAnchor(ZISServiceAnchor **anchor);
 void zisUpdateServiceAnchor(ZISServiceAnchor *anchor,
                             const struct ZISPlugin_tag *plugin,
                             const ZISService *service);

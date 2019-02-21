@@ -96,13 +96,13 @@ ZISPluginAnchor *zisCreatePluginAnchor(const ZISPlugin *plugin) {
   return anchor;
 }
 
-void zisRemovePluginAnchor(ZISPluginAnchor *anchor) {
+void zisRemovePluginAnchor(ZISPluginAnchor **anchor) {
 
   unsigned int size = sizeof(ZISPluginAnchor);
   int subpool = CROSS_MEMORY_SERVER_SUBPOOL;
   int key = CROSS_MEMORY_SERVER_KEY;
 
-  cmFree(anchor, size, subpool, key);
+  cmFree2((void **)anchor, size, subpool, key);
 
 }
 

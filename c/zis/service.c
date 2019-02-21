@@ -103,13 +103,13 @@ ZISServiceAnchor *zisCreateServiceAnchor(const struct ZISPlugin_tag *plugin,
   return anchor;
 }
 
-void zisRemoveServiceAnchor(ZISServiceAnchor *anchor) {
+void zisRemoveServiceAnchor(ZISServiceAnchor **anchor) {
 
   unsigned int size = sizeof(ZISServiceAnchor);
   int subpool = CROSS_MEMORY_SERVER_SUBPOOL;
   int key = CROSS_MEMORY_SERVER_KEY;
 
-  cmFree(anchor, size, subpool, key);
+  cmFree2((void **)anchor, size, subpool, key);
 
 }
 
