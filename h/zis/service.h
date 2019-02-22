@@ -143,8 +143,9 @@ void zisUpdateServiceAnchor(ZISServiceAnchor *anchor,
 #define RC_ZIS_SRVC_SERVICE_FAILED      4
 #define RC_ZIS_SRVC_CMS_FAILED          8
 #define RC_ZIS_SRVC_GLOBAL_AREA_NULL    9
-#define RC_ZIS_SRVC_SERVICE_TABLE_NULL  10
-#define RC_ZIS_SRVC_SERVICE_NOT_FOUND   11
+#define RC_ZIS_SRVC_SEVER_ANCHOR_NULL   10
+#define RC_ZIS_SRVC_SERVICE_TABLE_NULL  11
+#define RC_ZIS_SRVC_SERVICE_NOT_FOUND   12
 
 #define ZIS_MAX_GEN_SRVC_RC             32
 

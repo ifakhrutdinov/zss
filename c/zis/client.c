@@ -291,6 +291,9 @@ int zisCallService(const CrossMemoryServerName *serverName,
   }
 
  ZISServerAnchor *serverAnchor = cmsGA->userServerAnchor;
+ if (serverAnchor == NULL) {
+   return RC_ZIS_SRVC_SEVER_ANCHOR_NULL;
+ }
 
  if (serverAnchor->serviceTable == NULL) {
    return RC_ZIS_SRVC_SERVICE_TABLE_NULL;
