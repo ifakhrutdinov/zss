@@ -312,7 +312,9 @@ int zisCallService(const CrossMemoryServerName *serverName,
     routerServiceID = ZIS_SERVICE_ID_SRVC_ROUTER_CP;
   }
 
-  ZISServiceRouterParm routerParmList = {ZIS_SERVICE_ROUTER_EYECATCHER};
+  ZISServiceRouterParm routerParmList = {0};
+  memcpy(routerParmList.eyecatcher, ZIS_SERVICE_ROUTER_EYECATCHER,
+         sizeof(routerParmList.eyecatcher));
   routerParmList.targetServicePath = *path;
   routerParmList.targetServiceParm = parm;
 
