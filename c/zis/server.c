@@ -95,7 +95,7 @@ static int zisRouteService(struct CrossMemoryServerGlobalArea_tag *globalArea,
 }
 
 
-static void registerZISServiceRouter(CrossMemoryServer *cms) {
+static int registerZISServiceRouter(CrossMemoryServer *cms) {
 
   int regRC = RC_CMS_OK;
 
@@ -103,8 +103,9 @@ static void registerZISServiceRouter(CrossMemoryServer *cms) {
   regRC = cmsRegisterService(cms, ZIS_SERVICE_ID_SRVC_ROUTER_CP,
                              zisRouteService, NULL, pccpRouterFlags);
   if (regRC != RC_CMS_OK) {
-    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
+    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
             "PC-cp ZIS router not registered, RC = %d", regRC);
+    return RC_ZIS_ERROR;
   }
 
   int pcssRouterFlags = CMS_SERVICE_FLAG_RELOCATE_TO_COMMON |
@@ -112,29 +113,47 @@ static void registerZISServiceRouter(CrossMemoryServer *cms) {
   regRC = cmsRegisterService(cms, ZIS_SERVICE_ID_SRVC_ROUTER_SS,
                              zisRouteService, NULL, pcssRouterFlags);
   if (regRC != RC_CMS_OK) {
-    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
+    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
             "PC-ss ZIS router not registered, RC = %d", regRC);
+    return RC_ZIS_ERROR;
   }
 
+  return RC_ZIS_OK;
 }
 
 static int registerCoreServices(ZISContext *context) {
 
   CrossMemoryServer *server = context->cmsServer;
 
-  /* TODO handle us */
-  cmsRegisterService(server, ZIS_SERVICE_ID_AUTH_SRV,
-                     zisAuthServiceFunction, NULL,
-                     CMS_SERVICE_FLAG_RELOCATE_TO_COMMON);
-  cmsRegisterService(server, ZIS_SERVICE_ID_SNARFER_SRV,
-                     zisSnarferServiceFunction, NULL,
-                     CMS_SERVICE_FLAG_SPACE_SWITCH |
-                     CMS_SERVICE_FLAG_RELOCATE_TO_COMMON);
-  cmsRegisterService(server, ZIS_SERVICE_ID_NWM_SRV,
-                     zisNWMServiceFunction, NULL,
-                     CMS_SERVICE_FLAG_RELOCATE_TO_COMMON);
+  int regRC = RC_CMS_OK;
 
-  registerZISServiceRouter(server);
+  regRC = cmsRegisterService(server, ZIS_SERVICE_ID_AUTH_SRV,
+                             zisAuthServiceFunction, NULL,
+                             CMS_SERVICE_FLAG_RELOCATE_TO_COMMON);
+  if (regRC != RC_CMS_OK) {
+    return RC_ZIS_ERROR;
+  }
+
+  regRC = cmsRegisterService(server, ZIS_SERVICE_ID_SNARFER_SRV,
+                             zisSnarferServiceFunction, NULL,
+                             CMS_SERVICE_FLAG_SPACE_SWITCH |
+                             CMS_SERVICE_FLAG_RELOCATE_TO_COMMON);
+  if (regRC != RC_CMS_OK) {
+    return RC_ZIS_ERROR;
+  }
+
+  regRC = cmsRegisterService(server, ZIS_SERVICE_ID_NWM_SRV,
+                             zisNWMServiceFunction, NULL,
+                             CMS_SERVICE_FLAG_RELOCATE_TO_COMMON);
+  if (regRC != RC_CMS_OK) {
+    return RC_ZIS_ERROR;
+  }
+
+
+  regRC = registerZISServiceRouter(server);
+  if (regRC != RC_CMS_OK) {
+    return RC_ZIS_ERROR;
+  }
 
   return RC_ZIS_OK;
 }
