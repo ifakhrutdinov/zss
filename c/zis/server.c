@@ -123,7 +123,7 @@ static int registerZISServiceRouter(CrossMemoryServer *cms) {
 
 static int registerCoreServices(ZISContext *context) {
 
-  CrossMemoryServer *server = context->cmsServer;
+  CrossMemoryServer *server = context->cmServer;
 
   int regRC = RC_CMS_OK;
 
@@ -293,6 +293,7 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
       if (initRC != RC_ZIS_OK) {
         zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
                 "Service \'%16.16s\' init RC = %d", service->name.text, initRC);
+        continue;
       }
     }
 
@@ -417,6 +418,7 @@ static int installPlugin(ZISContext *context, ZISPlugin *plugin,
     if (initRC != RC_ZIS_OK) {
       zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
               "Plugin \'%16.16s\' init RC = %d", plugin->name.text, initRC);
+      return RC_ZIS_ERROR;
     }
   }
 
@@ -487,7 +489,7 @@ static ZISPlugin *tryLoadingPlugin(EightCharString moduleName) {
   recoveryRC = recoveryPush("tryLoadingPlugin():exec",
                             RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY,
                             "ZIS get plugin", extractABENDInfo, &abendInfo,
-                             NULL, NULL);
+                            NULL, NULL);
   {
     if (recoveryRC == RC_RCV_OK) {
 
@@ -691,7 +693,7 @@ static ZISContext makeContext(STCBase *base) {
       .eyecatcher = ZIS_CONTEXT_EYECATCHER,
       .stcBase = base,
       .parms = NULL,
-      .cmsServer = NULL,
+      .cmServer = NULL,
       .cmsGA = NULL,
       .zisAnchor = NULL,
   };
@@ -704,9 +706,9 @@ static void cleanContext(ZISContext *context) {
   context->zisAnchor = NULL;
   context->cmsGA = NULL;
 
-  if (context->cmsServer != NULL) {
-    removeCrossMemoryServer(context->cmsServer);
-    context->cmsServer = NULL;
+  if (context->cmServer != NULL) {
+    removeCrossMemoryServer(context->cmServer);
+    context->cmServer = NULL;
   }
 
   if (context->parms != NULL) {
@@ -778,17 +780,17 @@ static void terminatePlugins(ZISContext *context) {
 
 static int initServer(CrossMemoryServerGlobalArea *ga, void *userData) {
 
-  ZISContext *cntx = userData;
-  cntx->cmsGA = ga;
-  cntx->cmsServer = ga->localServerAddress;
+  ZISContext *context = userData;
+  context->cmsGA = ga;
+  context->cmServer = ga->localServerAddress;
 
-  int initRC = initGlobalResources(cntx);
+  int initRC = initGlobalResources(context);
   if (initRC != RC_ZIS_OK) {
     return initRC;
   }
 
-  cleanPlugins(cntx);
-  deployPlugins(cntx);
+  cleanPlugins(context);
+  deployPlugins(context);
 
   return RC_CMS_OK;
 }
@@ -987,7 +989,7 @@ static int initCoreServer(ZISContext *context) {
     return RC_ZIS_ERROR;
   }
 
-  context->cmsServer = cmServer;
+  context->cmServer = cmServer;
 
   int loadParmRSN = 0;
   int loadParmRC = zisLoadParmsToCMServer(cmServer, context->parms,
@@ -1003,7 +1005,7 @@ static int initCoreServer(ZISContext *context) {
 
 static int runCoreServer(ZISContext *context) {
 
-  int startRC = cmsStartMainLoop(context->cmsServer);
+  int startRC = cmsStartMainLoop(context->cmServer);
   if (startRC != RC_CMS_OK) {
     zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE,
             ZIS_LOG_CXMS_NOT_STARTED_MSG, startRC);

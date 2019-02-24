@@ -16,7 +16,7 @@ typedef struct ZISContext_tag {
 #define ZIS_CONTEXT_EYECATCHER "ZISCNTXT"
   struct STCBase_tag *stcBase;
   ZISParmSet *parms;
-  CrossMemoryServer *cmsServer;
+  CrossMemoryServer *cmServer;
   CrossMemoryServerGlobalArea *cmsGA;
   struct ZISServerAnchor_tag *zisAnchor;
   struct ZISPlugin_tag *firstPlugin;

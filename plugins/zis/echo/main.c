@@ -72,7 +72,7 @@ static int handleCommands(struct ZISContext_tag *context,
 
       /* We can use zowelog but I don't want to link with a lot of unnecessary
        * object files.  */
-      cmsPrintf(&context->cmsServer->name,
+      cmsPrintf(&context->cmServer->name,
                 "Echo plug-in v%d - anchor = 0x%p, init TOD = %16.16llX\n",
                 plugin->version, anchor, pluginData->initTime);
 
