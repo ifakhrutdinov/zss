@@ -66,6 +66,13 @@ int zisPluginAddService(ZISPlugin *plugin, ZISService service) {
     return RC_ZIS_PLUGIN_SEVICE_TABLE_FULL;
   }
 
+  bool isPCCPService = !(service.flags & ZIS_SERVICE_ANCHOR_FLAG_SPACE_SWITCH);
+  bool isLPAPlugin = plugin->flags & ZIS_PLUGIN_ANCHOR_FLAG_LPA;
+
+  if (isPCCPService && !isLPAPlugin) {
+    return RC_ZIS_PLUGIN_INCOMPATIBLE_SEVICE;
+  }
+
   plugin->services[plugin->serviceCount++] = service;
 
   return RC_ZIS_PLUGIN_OK;
