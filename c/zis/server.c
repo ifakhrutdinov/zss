@@ -211,7 +211,8 @@ static ZISPluginAnchor *findPluginAnchor(const ZISServerAnchor *serverAnchor,
   ZISPluginAnchor *currAnchor = serverAnchor->firstPlugin;
 
   while (currAnchor) {
-    if (memcmp(name, &currAnchor->name, sizeof(ZISPluginName)) == 0) {
+    if (memcmp(name, &currAnchor->name, sizeof(ZISPluginName)) == 0 &&
+        currAnchor->version <= ZIS_PLUGIN_ANCHOR_VERSION) {
       return currAnchor;
     }
     currAnchor = currAnchor->next;
@@ -226,7 +227,8 @@ static ZISServiceAnchor *findServiceAnchor(const ZISPluginAnchor *pluginAnchor,
   ZISServiceAnchor *currAnchor = pluginAnchor->firstService;
 
   while (currAnchor) {
-    if (!memcmp(name, &currAnchor->path.serviceName, sizeof(ZISServiceName))) {
+    if (!memcmp(name, &currAnchor->path.serviceName, sizeof(ZISServiceName)) &&
+        currAnchor->version <= ZIS_SERVER_ANCHOR_VERSION) {
       return currAnchor;
     }
     currAnchor = currAnchor->next;
