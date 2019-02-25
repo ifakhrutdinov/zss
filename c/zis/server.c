@@ -103,8 +103,6 @@ static int registerZISServiceRouter(CrossMemoryServer *cms) {
   regRC = cmsRegisterService(cms, ZIS_SERVICE_ID_SRVC_ROUTER_CP,
                              zisRouteService, NULL, pccpRouterFlags);
   if (regRC != RC_CMS_OK) {
-    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
-            "PC-cp ZIS router not registered, RC = %d", regRC);
     return RC_ZIS_ERROR;
   }
 
@@ -113,8 +111,6 @@ static int registerZISServiceRouter(CrossMemoryServer *cms) {
   regRC = cmsRegisterService(cms, ZIS_SERVICE_ID_SRVC_ROUTER_SS,
                              zisRouteService, NULL, pcssRouterFlags);
   if (regRC != RC_CMS_OK) {
-    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
-            "PC-ss ZIS router not registered, RC = %d", regRC);
     return RC_ZIS_ERROR;
   }
 
@@ -184,8 +180,8 @@ static int initServiceTable(ZISContext *context) {
     anchor->serviceTable = makeCrossMemoryMap(sizeof(ZISServicePath));
     if (anchor->serviceTable == NULL) {
       if (anchor == NULL) {
-        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
-                "Service table not created");
+        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE,
+                ZIS_LOG_CXMS_RES_ALLOC_FAILED_MSG, "service table");
         return RC_ZIS_ERROR;
       }
     }
@@ -274,8 +270,8 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
     if (anchor == NULL) {
       anchor = zisCreateServiceAnchor(plugin, service);
       if (anchor == NULL) {
-        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Service anchor not allocated");
+        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_SEVERE,
+                ZIS_LOG_CXMS_RES_ALLOC_FAILED_MSG, "service anchor");
         return RC_ZIS_ERROR;
       }
       anchor->next = pluginAnchor->firstService;
@@ -286,15 +282,18 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
 
     service->anchor = anchor;
 
-    zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-            "Adding service %32.32s\n", (char *)&anchor->path);
+    zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_SERVICE_ADDED_MSG,
+            anchor->path.pluginName, anchor->path.serviceName.text,
+            plugin->pluginVersion);
 
     /* Service init call. */
     if (service->init != NULL) {
       int initRC = service->init(context, service, anchor);
       if (initRC != RC_ZIS_OK) {
-        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Service \'%16.16s\' init RC = %d", service->name.text, initRC);
+        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
+                ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" service '%16.16s' "
+                "init RC = %d",
+                plugin->name.text, service->name.text, initRC);
         continue;
       }
     }
@@ -303,8 +302,8 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
     if (putRC == 1) {
       *crossMemoryMapGetHandle(serviceTable, &anchor->path) = anchor;
     } else if (putRC == -1) {
-      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-              "Service not registered in lookup table");
+      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_SEVERE,
+              ZIS_LOG_CXMS_RES_ALLOC_FAILED_MSG, "service map entry");
       return RC_ZIS_ERROR;
     }
 
@@ -326,23 +325,22 @@ static int relocatePluginToLPAIfNeeded(ZISPlugin* plugin,
     if (anchor->pluginVersion != plugin->pluginVersion) {
 
       zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
-              ZIS_LOG_TMP_DEV_MSG"Plugin '%16.16s' version %u doesn't match "
-              "anchor version %u, LPA module discarded",
-              plugin->name.text, plugin->pluginVersion, anchor->pluginVersion);
+              ZIS_LOG_PLUGIN_VER_MISMATCH_MSG, plugin->name.text,
+              plugin->pluginVersion, anchor->pluginVersion);
       zowedump(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
                (char *)&anchor->moduleInfo, sizeof(LPMEA));
 
 #ifdef ZIS_LPA_DEV_MODE
 
-      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_INFO, CMS_LOG_DEBUG_MSG_ID
+      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_INFO, ZIS_LOG_DEBUG_MSG_ID
               " Plugin LPA dev mode enabled, issuing CSVDYLPA DELETE\n");
 
       int lpaRSN = 0;
       int lpaRC = lpaDelete(&anchor->moduleInfo, &lpaRSN);
       if (lpaRC != 0) {
-        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Plugin module \'%8.8s\' not deleted from LPA, RC = %d, RSN = %d",
-                anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
+        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_SEVERE, ZIS_LOG_LPA_FAILURE_MSG,
+                "DELETE", anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
+        return RC_ZIS_ERROR;
       }
 #endif
       memset(&anchor->moduleInfo, 0, sizeof(anchor->moduleInfo));
@@ -363,9 +361,8 @@ static int relocatePluginToLPAIfNeeded(ZISPlugin* plugin,
       int lpaRSN = 0;
       int lpaRC = lpaAdd(&anchor->moduleInfo, &ddname, &moduleName, &lpaRSN);
       if (lpaRC != 0) {
-        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Plugin module \'%8.8s\' not added to LPA, RC = %d, RSN = %d",
-                anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
+        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_SEVERE, ZIS_LOG_LPA_FAILURE_MSG,
+                "ADD", anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
         return RC_ZIS_ERROR;
       }
 
@@ -393,8 +390,8 @@ static int installPlugin(ZISContext *context, ZISPlugin *plugin,
   if (anchor == NULL) {
     anchor = zisCreatePluginAnchor(plugin);
     if (anchor == NULL) {
-      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-              "Plugin anchor not allocated");
+      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
+              ZIS_LOG_CXMS_RES_ALLOC_FAILED_MSG, "plug-in anchor");
       return RC_ZIS_ERROR;
     }
     anchor->next = context->zisAnchor->firstPlugin;
@@ -418,8 +415,9 @@ static int installPlugin(ZISContext *context, ZISPlugin *plugin,
   if (plugin->init != NULL) {
     int initRC = plugin->init(context, plugin, anchor);
     if (initRC != RC_ZIS_OK) {
-      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-              "Plugin \'%16.16s\' init RC = %d", plugin->name.text, initRC);
+      zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
+              ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in init RC = %d",
+              plugin->name.text, initRC);
       return RC_ZIS_ERROR;
     }
   }
@@ -437,12 +435,15 @@ typedef struct ABENDInfo_tag {
   int reasonCode;
 } ABENDInfo;
 
-static void extractABENDInfo(RecoveryContext * __ptr32 context, SDWA * __ptr32 sdwa, void * __ptr32 userData) {
+static void extractABENDInfo(RecoveryContext * __ptr32 context,
+                             SDWA * __ptr32 sdwa,
+                             void * __ptr32 userData) {
   ABENDInfo *info = (ABENDInfo *)userData;
   recoveryGetABENDCode(sdwa, &info->completionCode, &info->reasonCode);
 }
 
-static ZISPlugin *tryLoadingPlugin(EightCharString moduleName) {
+static ZISPlugin *tryLoadingPlugin(const char *pluginName,
+                                   EightCharString moduleName) {
 
   void *ep = NULL;
 
@@ -461,16 +462,17 @@ static ZISPlugin *tryLoadingPlugin(EightCharString moduleName) {
       int loadStatus = 0;
       ep = loadByName(moduleName.text, &loadStatus);
       if (ep == NULL || loadStatus != 0) {
-        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Module '%8.8s' not loaded, EP = %p, status = %d",
-                moduleName.text, ep, loadStatus);
+        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+                ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" module '%8.8s' not loaded, "
+                "EP = %p, status = %d",
+                pluginName, moduleName.text, ep, loadStatus);
       }
 
     } else {
-      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-              "Module '%s' not loaded, recovery RC = %d, ABEND %03X-%02X",
-              moduleName.text, recoveryRC,
-              abendInfo.completionCode,
+      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+              ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" module '%8.8s' not loaded, "
+              "recovery RC = %d, ABEND %03X-%02X",
+              pluginName, moduleName.text, recoveryRC, abendInfo.completionCode,
               abendInfo.reasonCode);
     }
   }
@@ -497,14 +499,18 @@ static ZISPlugin *tryLoadingPlugin(EightCharString moduleName) {
 
       plugin = getPluginDescriptor();
       if (plugin == NULL) {
-        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Plugin descriptor NULL for module \'%s\'", moduleName);
+        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+                ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in descriptor not "
+                "received from module '%8.8s'",
+                pluginName, moduleName);
       }
 
     } else {
-      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-              "Plugin EP not executed, recovery RC = %d, ABEND %03X-%02X",
-              recoveryRC, abendInfo.completionCode, abendInfo.reasonCode);
+      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+              ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in EP not executed, "
+              "module '%8.8s', recovery RC = %d, ABEND %03X-%02X",
+              pluginName, moduleName, recoveryRC, abendInfo.completionCode,
+              abendInfo.reasonCode);
     }
   }
 
@@ -544,32 +550,35 @@ static bool isPluginValid(const char *name, const ZISPlugin *plugin) {
 
       if (memcmp(plugin->eyecatcher, ZIS_PLUGIN_EYECATCHER,
                  sizeof(plugin->eyecatcher))) {
-        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Plugin validation failed, name = \'%s\', bad eyecatcher", name);
+        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+                ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" bad eyecatcher",
+                name);
         break;
       }
 
       if (plugin->version > ZIS_PLUGIN_VERSION) {
-        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Plugin validation failed, name = \'%s\', unsupported version %d"
+        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+                ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" unsupported version %d "
                 "(vs %d)",
                 name, plugin->version, ZIS_PLUGIN_VERSION);
         break;
       }
 
       if (plugin->serviceCount > plugin->maxServiceCount) {
-        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Plugin validation failed, name = \'%s\', inconsistent service "
-                "count, current = %d, max = %d",
+        zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+                ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" bad service count, "
+                "current = %d, max = %d",
                 name, plugin->serviceCount, plugin->maxServiceCount);
         break;
       }
 
       for (unsigned i = 0; i < plugin->serviceCount; i++) {
         if (isServiceValid(&plugin->services[i]) == false) {
-          zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                  "Plugin validation failed, name = \'%s\', service #%d invalid",
+          zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+                  ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" service #%d invalid",
                   name, i);
+          zowedump(NULL, LOG_COMP_STCBASE, ZOWE_LOG_INFO,
+                   (void *)&plugin->services[i], sizeof(ZISService));
           break;
         }
       }
@@ -577,12 +586,10 @@ static bool isPluginValid(const char *name, const ZISPlugin *plugin) {
       isValid = true;
 
     } else {
-      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-              "Plugin validation failed, name = \'%s\', "
+      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+              ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" installation failed, "
               "recovery RC = %d, ABEND %03X-%02X",
-              name, recoveryRC,
-              abendInfo.completionCode,
-              abendInfo.reasonCode);
+              name, recoveryRC, abendInfo.completionCode, abendInfo.reasonCode);
       break;
     }
 
@@ -604,8 +611,9 @@ static void visitPluginParm(const char *name, const char *value,
   const char *pluginName = name + strlen("ZWES.PLUGIN.");
 
   if (value == NULL) {
-    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-            "Module name not provided for plugin \'%s\'", pluginName);
+    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+            ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" module name not provided",
+            pluginName);
     return;
   }
 
@@ -613,13 +621,14 @@ static void visitPluginParm(const char *name, const char *value,
   EightCharString moduleName = {"        "};
   size_t moduleNameLength = strlen(value);
   if (moduleNameLength > sizeof(moduleName)) {
-    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-            "Module name too long, \'%s\'", value);
+    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+            ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" module name too long '%s'",
+            pluginName, value);
     return;
   }
   memcpy(moduleName.text, value, moduleNameLength);
 
-  ZISPlugin *plugin = tryLoadingPlugin(moduleName);
+  ZISPlugin *plugin = tryLoadingPlugin(pluginName, moduleName);
   if (plugin == NULL) {
     return;
   }
@@ -673,8 +682,8 @@ static int initGlobalResources(ZISContext *context) {
   if (anchor == NULL) {
     anchor = createZISServerAnchor();
     if (anchor == NULL) {
-      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
-              "ZIS server anchor not created");
+      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE,
+              ZIS_LOG_CXMS_RES_ALLOC_FAILED_MSG, "server anchor");
       return RC_ZIS_ERROR;
     }
     cmsGA->userServerAnchor = anchor;
@@ -758,9 +767,10 @@ static void terminatePlugins(ZISContext *context) {
       if (currService->term != NULL) {
         int termRC = currService->term(context, currService, currService->anchor);
         if (termRC != RC_ZIS_OK) {
-          zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                  "Service \'%16.16s\' term RC = %d",
-                  currService->name.text, termRC);
+          zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
+                  ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" service '%16.16s' term "
+                  "RC = %d",
+                  currPlugin->name.text, currService->name.text, termRC);
         }
       }
 
@@ -769,8 +779,9 @@ static void terminatePlugins(ZISContext *context) {
     if (currPlugin->term != NULL) {
       int termRC = currPlugin->term(context, currPlugin, currPlugin->anchor);
       if (termRC != RC_ZIS_OK) {
-        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_TMP_DEV_MSG
-                "Plugin \'%16.16s\' term RC = %d",
+        zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
+                ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in '%16.16s' term "
+                "RC = %d",
                 currPlugin->name.text, termRC);
       }
     }
@@ -895,16 +906,16 @@ static int loadConfig(ZISContext *context,
 
   int readMainParmsRC = zisReadMainParms(context->parms, mainParms);
   if (readMainParmsRC != RC_ZISPARM_OK) {
-    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
-            "Main parms not read, RC = %d", readMainParmsRC);
+    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_CONFIG_FAILURE_MSG,
+            "main parms not read", readMainParmsRC);
     return RC_ZIS_ERROR;
   }
 
   PARMLIBMember parmlibMember;
   int parmlibRC = extractPARMLIBMemberName(context->parms, &parmlibMember);
   if (parmlibRC != RC_ZIS_OK) {
-    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_TMP_DEV_MSG
-            "PARMLIB member not extracted, RC = %d", parmlibRC);
+    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE, ZIS_LOG_CONFIG_FAILURE_MSG,
+            "PARMLIB member not extracted", parmlibRC);
     return RC_ZIS_ERROR;
   }
 
@@ -913,7 +924,7 @@ static int loadConfig(ZISContext *context,
                                   parmlibMember.nameNullTerm, &readStatus);
   if (readParmRC != RC_ZISPARM_OK) {
     if (readParmRC == RC_ZISPARM_MEMBER_NOT_FOUND) {
-      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+      zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_SEVERE,
               ZIS_LOG_CXMS_CFG_MISSING_MSG,
               parmlibMember.nameNullTerm, readParmRC);
       return RC_ZIS_ERROR;
