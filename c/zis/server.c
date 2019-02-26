@@ -502,7 +502,7 @@ static ZISPlugin *tryLoadingPlugin(const char *pluginName,
     if (recoveryRC == RC_RCV_OK) {
 
       int loadStatus = 0;
-      ep = loadByName(moduleName.text, &loadStatus);
+      ep = loadByNameLocally(moduleName.text, &loadStatus);
       if (ep == NULL || loadStatus != 0) {
         zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
                 ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" module '%8.8s' not loaded, "
@@ -513,9 +513,9 @@ static ZISPlugin *tryLoadingPlugin(const char *pluginName,
     } else {
       zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
               ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" module '%8.8s' not loaded, "
-              "recovery RC = %d, ABEND %03X-%02X",
-              pluginName, moduleName.text, recoveryRC, abendInfo.completionCode,
-              abendInfo.reasonCode);
+              "ABEND S%03X-%02X (recovery RC = %d)",
+              pluginName, moduleName.text, abendInfo.completionCode,
+              abendInfo.reasonCode, recoveryRC);
     }
   }
 
