@@ -93,8 +93,9 @@ struct ZISService_tag {
 
   PAD_LONG(1, ZISServiceInitFunction *init);
   PAD_LONG(2, ZISServiceTermFunction *term);
-  PAD_LONG(3, ZISServiceModifyCommandFunction *handleCommand);
   PAD_LONG(4, ZISServiceServeFunction *serve);
+
+  char reserved[440];
 
 };
 
@@ -110,14 +111,12 @@ ZOWE_PRAGMA_PACK_RESET
 ZISService zisCreateService(ZISServiceName name, int flags,
                             ZISServiceInitFunction *initFunction,
                             ZISServiceTermFunction *termFunction,
-                            ZISServiceModifyCommandFunction *commandFunction,
                             ZISServiceServeFunction *serveFunction);
 
 ZISService zisCreateSpaceSwitchService(
     ZISServiceName name,
     ZISServiceInitFunction *initFunction,
     ZISServiceTermFunction *termFunction,
-    ZISServiceModifyCommandFunction *commandFunction,
     ZISServiceServeFunction *serveFunction
 );
 
@@ -125,7 +124,6 @@ ZISService zisCreateCurrentPrimaryService(
     ZISServiceName name,
     ZISServiceInitFunction *initFunction,
     ZISServiceTermFunction *termFunction,
-    ZISServiceModifyCommandFunction *commandFunction,
     ZISServiceServeFunction *serveFunction
 );
 

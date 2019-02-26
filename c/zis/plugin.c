@@ -11,6 +11,7 @@
 */
 
 #include <metal/metal.h>
+#include <metal/ctype.h>
 #include <metal/stddef.h>
 #include <metal/stdlib.h>
 #include <metal/string.h>
@@ -22,13 +23,64 @@
 #include "zis/plugin.h"
 #include "zis/service.h"
 
+static bool isNameValid(const ZISPluginName *name) {
+
+  for (int i = 0; i < sizeof(name->text); i++) {
+    if (!isprint(name->text[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+static bool isNicknameValid(const ZISPluginNickname *nickname) {
+
+  bool spaceFound = false;
+
+  for (int i = 0; i < sizeof(nickname->text); i++) {
+
+    char c = nickname->text[i];
+
+    if (!isprint(c)) {
+      return false;
+    }
+
+    if (isgraph(c)) {
+      if (spaceFound) {
+        return false;
+      }
+    }
+
+    if (isspace(c)) {
+      if (i == 0) {
+        return false;
+      }
+      spaceFound = true;
+    }
+
+  }
+
+  return true;
+}
+
+
 ZISPlugin *zisCreatePlugin(ZISPluginName name,
+                           ZISPluginNickname nickname,
                            ZISPuginInitFunction *initFunction,
                            ZISPuginInitFunction *termFunction,
                            ZISPuginModifyCommandFunction *commandFunction,
                            unsigned int version,
                            unsigned int serviceCount,
                            int flags) {
+
+  if (!isNameValid(&name)) {
+    return false;
+  }
+
+  if (!isNicknameValid(&nickname)) {
+    return false;
+  }
 
   unsigned int requiredSize = sizeof(ZISPlugin) +
       sizeof(ZISService) * serviceCount;
@@ -45,6 +97,7 @@ ZISPlugin *zisCreatePlugin(ZISPluginName name,
   plugin->flags = flags;
   plugin->maxServiceCount = serviceCount;
   plugin->name = name;
+  plugin->nickname = nickname;
 
   plugin->init = initFunction;
   plugin->term = termFunction;

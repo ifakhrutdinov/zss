@@ -41,6 +41,11 @@ typedef struct ZISPluginName_tag {
   char text[16];
 } ZISPluginName;
 
+
+typedef struct ZISPluginNickname_tag {
+  char text[4];
+} ZISPluginNickname;
+
 struct ZISPluginData_tag {
   char data[64];
 };
@@ -89,9 +94,15 @@ struct ZISPlugin_tag {
   PAD_LONG(1, ZISPluginAnchor *anchor);
 
   ZISPluginName name;
+  ZISPluginNickname nickname;
+
+  char reserved0[4];
+
   PAD_LONG(2, ZISPuginInitFunction *init);
   PAD_LONG(3, ZISPuginTermFunction *term);
   PAD_LONG(4, ZISPuginModifyCommandFunction *handleCommand);
+
+  char reserved1[932];
 
   unsigned int pluginVersion;
   unsigned int serviceCount;
@@ -110,6 +121,7 @@ typedef ZISPlugin *(ZISPluginDescriptorFunction)();
 #pragma map(zisRemovePluginAnchor, "ZISPLGRM")
 
 ZISPlugin *zisCreatePlugin(ZISPluginName name,
+                           ZISPluginNickname nickname,
                            ZISPuginInitFunction *initFunction,
                            ZISPuginInitFunction *termFunction,
                            ZISPuginModifyCommandFunction *commandFunction,

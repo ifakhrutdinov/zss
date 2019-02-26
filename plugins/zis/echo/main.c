@@ -64,9 +64,10 @@ static int handleCommands(struct ZISContext_tag *context,
   }
 
   if (!strcmp(command->commandVerb, "D") ||
+      !strcmp(command->commandVerb, "DIS") ||
       !strcmp(command->commandVerb, "DISPLAY")) {
 
-    if (!strcmp(command->args[0], "ECHO")) {
+    if (!strcmp(command->args[0], "STATUS")) {
 
       EchoPluginData *pluginData = (EchoPluginData *)&anchor->pluginData;
 
@@ -74,7 +75,7 @@ static int handleCommands(struct ZISContext_tag *context,
        * object files.  */
       cmsPrintf(&context->cmServer->name,
                 "Echo plug-in v%d - anchor = 0x%p, init TOD = %16.16llX\n",
-                plugin->version, anchor, pluginData->initTime);
+                plugin->pluginVersion, anchor, pluginData->initTime);
 
       *status = CMS_MODIFY_COMMAND_STATUS_CONSUMED;
     }
@@ -87,14 +88,16 @@ static int handleCommands(struct ZISContext_tag *context,
 ZISPlugin *getPluginDescriptor() {
 
   ZISPluginName pluginName = {.text = "ECHO            "};
-  ZISPlugin *plugin = zisCreatePlugin(pluginName, init, term, handleCommands,
-                                      2, 1, ZIS_PLUGIN_FLAG_LPA);
+  ZISPluginNickname pluginNickname = {.text = "ECHO"};
+  ZISPlugin *plugin = zisCreatePlugin(pluginName, pluginNickname,
+                                      init, term, handleCommands,
+                                      7, 1, ZIS_PLUGIN_FLAG_LPA);
   if (plugin == NULL) {
     return NULL;
   }
 
   ZISServiceName serviceName = {.text = "ECHO-MESSAGE    "};
-  ZISService service = zisCreateSpaceSwitchService(serviceName, NULL, NULL, NULL,
+  ZISService service = zisCreateSpaceSwitchService(serviceName, NULL, NULL,
                                                    serveEchoedMessage);
 
   zisPluginAddService(plugin, service);

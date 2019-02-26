@@ -383,6 +383,49 @@ static int relocatePluginToLPAIfNeeded(ZISPlugin* plugin,
   return RC_ZIS_OK;
 }
 
+static ZISPlugin *getPluginByName(ZISContext *context,
+                                  const ZISPluginName *name) {
+
+  /* TODO use a hashtable when the number of plugins grows, no point in that
+   * right now. */
+
+  ZISPlugin *currPlugin = context->firstPlugin;
+  while (currPlugin != NULL) {
+
+    if (!memcmp(&currPlugin->name, name, sizeof(ZISPluginName))) {
+      return currPlugin;
+    }
+
+    currPlugin = currPlugin->next;
+  }
+
+  return NULL;
+}
+
+static ZISPlugin *getPluginByNickname(ZISContext *context,
+                                      const ZISPluginNickname *nickname) {
+
+  /* TODO use a hashtable when the number of plugins grows, no point in that
+   * right now. */
+
+  ZISPlugin *currPlugin = context->firstPlugin;
+  while (currPlugin != NULL) {
+
+    if (!memcmp(&currPlugin->nickname, nickname, sizeof(ZISPluginNickname))) {
+      return currPlugin;
+    }
+
+    currPlugin = currPlugin->next;
+  }
+
+  return NULL;
+}
+
+static void addPlugin(ZISContext *context, ZISPlugin *plugin) {
+  plugin->next = context->firstPlugin;
+  context->firstPlugin = plugin;
+}
+
 static int installPlugin(ZISContext *context, ZISPlugin *plugin,
                          EightCharString moduleName) {
 
@@ -404,8 +447,7 @@ static int installPlugin(ZISContext *context, ZISPlugin *plugin,
   }
 
   /* Save plugin definition for later use by server. */
-  plugin->next = context->firstPlugin;
-  context->firstPlugin = plugin;
+  addPlugin(context, plugin);
   plugin->anchor = anchor;
 
   /* Update anchor */
@@ -602,6 +644,26 @@ static bool isPluginValid(const char *name, const ZISPlugin *plugin) {
   return isValid;
 }
 
+static bool isDuplicatePlugin(ZISContext *context,
+                              ZISPlugin *plugin) {
+
+  if (getPluginByName(context, &plugin->name) != NULL) {
+    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+            ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in with name '%s' already "
+            "exists ", plugin->name);
+    return true;
+  }
+
+  if (getPluginByNickname(context, &plugin->nickname) != NULL) {
+    zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
+            ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in with nickname '%s' "
+            "already exists ", plugin->nickname);
+    return true;
+  }
+
+  return false;
+}
+
 static void visitPluginParm(const char *name, const char *value,
                             void *userData) {
 
@@ -638,6 +700,10 @@ static void visitPluginParm(const char *name, const char *value,
   }
 
   ZISContext *context = userData;
+
+  if (isDuplicatePlugin(context, plugin)) {
+    return;
+  }
 
   installPlugin(context, plugin, moduleName);
 
@@ -828,31 +894,22 @@ static int handleModifyCommands(CrossMemoryServerGlobalArea *globalArea,
 
   ZISContext *context = userData;
 
-  ZISPlugin *currPlugin = context->firstPlugin;
-  while (currPlugin != NULL) {
+  ZISPluginNickname nickname;
+  memset(&nickname.text, ' ', sizeof(nickname.text));
 
-    for (unsigned int i = 0; i < currPlugin->serviceCount; i++) {
-      ZISService *currService = &currPlugin->services[i];
+  size_t targetLength = command->target ? strlen(command->target) : 0;
+  if (targetLength <= 0 && sizeof(nickname.text) < targetLength) {
+    return RC_CMS_OK;
+  }
+  memcpy(nickname.text, command->target, targetLength);
 
-      if (currService->handleCommand != NULL) {
-        currService->handleCommand(context, currService, currService->anchor,
-                                   command, status);
-        if (*status == CMS_MODIFY_COMMAND_STATUS_CONSUMED) {
-          return RC_CMS_OK;
-        }
-      }
-
+  ZISPlugin *plugin = getPluginByNickname(context, &nickname);
+  if (plugin != NULL && plugin->handleCommand != NULL) {
+    plugin->handleCommand(context, plugin, plugin->anchor,
+                          command, status);
+    if (*status == CMS_MODIFY_COMMAND_STATUS_PROCESSED) {
+      return RC_CMS_OK;
     }
-
-    if (currPlugin->handleCommand != NULL) {
-      currPlugin->handleCommand(context, currPlugin, currPlugin->anchor,
-                                command, status);
-      if (*status == CMS_MODIFY_COMMAND_STATUS_CONSUMED) {
-        return RC_CMS_OK;
-      }
-    }
-
-    currPlugin = currPlugin->next;
   }
 
   return RC_CMS_OK;
