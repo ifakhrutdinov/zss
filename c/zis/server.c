@@ -649,15 +649,15 @@ static bool isDuplicatePlugin(ZISContext *context,
 
   if (getPluginByName(context, &plugin->name) != NULL) {
     zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
-            ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in with name '%s' already "
-            "exists ", plugin->name);
+            ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in with this name already "
+            "exists ", plugin->name.text);
     return true;
   }
 
   if (getPluginByNickname(context, &plugin->nickname) != NULL) {
     zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
             ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in with nickname '%s' "
-            "already exists ", plugin->nickname);
+            "already exists ", plugin->name.text, plugin->nickname.text);
     return true;
   }
 
