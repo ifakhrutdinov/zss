@@ -44,6 +44,7 @@ typedef struct ZISParmSet_tag {
 #define ZIS_PARMSET_EYECATCHER "RSZISPST"
   ShortLivedHeap *slh;
   ZISParmSetEntry *firstEntry;
+  ZISParmSetEntry *lastEntry;
 } ZISParmSet;
 
 typedef struct ZISParmStatus_tag {

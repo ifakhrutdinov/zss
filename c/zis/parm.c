@@ -498,8 +498,13 @@ int zisPutParmValue(ZISParmSet *parms, const char *name, const char *value) {
     memcpy(entry->eyecatcher, ZIS_PARMSET_ENTRY_EYECATCHER,
            sizeof(entry->eyecatcher));
 
-    entry->next = parms->firstEntry;
-    parms->firstEntry = entry;
+    if (parms->firstEntry == NULL) {
+      parms->firstEntry = entry;
+      parms->lastEntry = entry;
+    } else {
+      parms->lastEntry->next = entry;
+      parms->lastEntry = entry;
+    }
 
   }
 
