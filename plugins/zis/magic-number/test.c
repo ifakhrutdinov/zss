@@ -24,7 +24,7 @@
 #include "zis/client.h"
 #include "zis/service.h"
 
-#include "services/echoservice.h"
+#include "services/getservice.h"
 
 #ifndef __ZOWE_OS_ZOS
 #error z/OS targets are supported only
@@ -45,35 +45,28 @@ int main(int argc, char **argv) {
 
   CrossMemoryServerName serverName = cmsMakeServerName(serverNameArg);
 
-  EchoServiceParmList parmlist = {
-      .eyecatcher = ECHO_SERVICE_PARMLIST_EYECATCHER,
-      .nullTermMessage = "hello from client code",
+  GetMNumServiceParmList parmlist = {
+      .eyecatcher = GET_SERVICE_PARMLIST_EYECATCHER,
   };
 
   ZISServiceStatus status = {0};
 
   int rc = RC_ZIS_SRVC_OK;
 
-  ZISServicePath path1 = {
-      .pluginName = "ECHO            ",
-      .serviceName.text = "ECHO-MESSAGE    ",
+  ZISServicePath path = {
+      .pluginName = "MAGIC           ",
+      .serviceName.text = "GET             ",
   };
 
-  rc = zisCallService(&serverName, &path1, &parmlist, &status);
-  if (rc != RC_ZIS_SRVC_OK) {
-    printf("error: msg rc = %d, status:\n", rc);
-    dumpbuffer((char *)&status, sizeof(status));
-    return RC_ERROR;
-  }
-
-  ZISServicePath path2 = {
-      .pluginName = "ECHO            ",
-      .serviceName.text = "ECHO-REV-MESSAGE",
-  };
-
-  rc = zisCallService(&serverName, &path2, &parmlist, &status);
-  if (rc != RC_ZIS_SRVC_OK) {
-    printf("error: reverse msg rc = %d, status:\n", rc);
+  rc = zisCallService(&serverName, &path, &parmlist, &status);
+  if (rc == RC_ZIS_SRVC_OK) {
+    if (parmlist.magicNumber == 5587) {
+      printf("info: magic data = %d\n", parmlist.magicNumber);
+    } else {
+      printf("info: wrong magic number %d\n", parmlist.magicNumber);
+    }
+  } else {
+    printf("error: rc = %d, status:\n", rc);
     dumpbuffer((char *)&status, sizeof(status));
     return RC_ERROR;
   }

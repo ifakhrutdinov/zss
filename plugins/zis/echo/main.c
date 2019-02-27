@@ -91,16 +91,21 @@ ZISPlugin *getPluginDescriptor() {
   ZISPluginNickname pluginNickname = {.text = "ECHO"};
   ZISPlugin *plugin = zisCreatePlugin(pluginName, pluginNickname,
                                       init, term, handleCommands,
-                                      7, 1, ZIS_PLUGIN_FLAG_LPA);
+                                      9, 2, ZIS_PLUGIN_FLAG_LPA);
   if (plugin == NULL) {
     return NULL;
   }
 
-  ZISServiceName serviceName = {.text = "ECHO-MESSAGE    "};
-  ZISService service = zisCreateSpaceSwitchService(serviceName, NULL, NULL,
-                                                   serveEchoedMessage);
+  ZISServiceName serviceName1 = {.text = "ECHO-MESSAGE    "};
+  ZISService service1 = zisCreateSpaceSwitchService(serviceName1, NULL, NULL,
+                                                    serveEchoedMessage);
 
-  zisPluginAddService(plugin, service);
+  ZISServiceName serviceName2 = {.text = "ECHO-REV-MESSAGE"};
+  ZISService service2 = zisCreateCurrentPrimaryService(serviceName2, NULL, NULL,
+                                                       serveReversedEchoedMessage);
+
+  zisPluginAddService(plugin, service1);
+  zisPluginAddService(plugin, service2);
 
   return plugin;
 }

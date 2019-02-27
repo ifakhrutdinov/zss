@@ -40,6 +40,34 @@ int serveEchoedMessage(const CrossMemoryServerGlobalArea *ga,
   return RC_ECHOSVC_OK;
 }
 
+static void reverseString(char *s) {
+  size_t length = strlen(s);
+  for (size_t i = 0; i < length / 2; i++) {
+    char tmp = s[i];
+    s[i] = s[length - 1 - i];
+    s[length - 1 - i] = tmp;
+  }
+}
+
+int serveReversedEchoedMessage(const CrossMemoryServerGlobalArea *ga,
+                               struct ZISServiceAnchor_tag *anchor,
+                               struct ZISServiceData_tag *data,
+                               void *serviceParmList) {
+
+  EchoServiceParmList localParmList;
+  cmCopyFromSecondaryWithCallerKey(&localParmList, serviceParmList,
+                                   sizeof(localParmList));
+
+  char echoedMessage[256] = {0};
+  reverseString(localParmList.nullTermMessage);
+  sprintf(echoedMessage, "ECHO: %s\n", localParmList.nullTermMessage);
+
+  cmsPrintf(&ga->serverName, echoedMessage);
+
+  return RC_ECHOSVC_OK;
+}
+
+
 
 /*
   This program and the accompanying materials are

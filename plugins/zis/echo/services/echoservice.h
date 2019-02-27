@@ -24,6 +24,11 @@ int serveEchoedMessage(const CrossMemoryServerGlobalArea *ga,
                        struct ZISServiceData_tag *data,
                        void *serviceParmList);
 
+int serveReversedEchoedMessage(const CrossMemoryServerGlobalArea *ga,
+                               struct ZISServiceAnchor_tag *anchor,
+                               struct ZISServiceData_tag *data,
+                               void *serviceParmList);
+
 #define RC_ECHOSVC_OK       0
 #define RC_ECHOSVC_ERROR    8
 
