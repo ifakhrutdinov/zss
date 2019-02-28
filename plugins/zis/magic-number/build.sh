@@ -51,7 +51,7 @@ as "${ASFLAGS[@]}" -aegimrsx=main.asm main.s
 export _LD_SYSLIB="//'SYS1.CSSLIB'://'CEE.SCEELKEX'://'CEE.SCEELKED'://'CEE.SCEERUN'://'CEE.SCEERUN2'://'CSF.SCSFMOD0'"
 
 ld "${LDFLAGS[@]}" -e getPluginDescriptor \
--o "//'$USER.DEV.LOADLIB(MAGIC)'" \
+-o "//'$USER.DEV.LOADLIB(MNUMBER)'" \
 alloc.o \
 cmutils.o \
 crossmemory.o \
@@ -65,7 +65,7 @@ plugin.o \
 service.o \
 getservice.o \
 main.o \
-> MAGIC.link
+> MNUMBER.link
 
 # Test client
 

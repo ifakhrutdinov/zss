@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
   int rc = RC_ZIS_SRVC_OK;
 
   ZISServicePath path = {
-      .pluginName = "MAGIC           ",
+      .pluginName = "MAGICNUMBER     ",
       .serviceName.text = "GET             ",
   };
 

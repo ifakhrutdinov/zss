@@ -47,7 +47,7 @@ static int handleCommands(struct ZISContext_tag *context,
 
 ZISPlugin *getPluginDescriptor() {
 
-  ZISPluginName pluginName = {.text = "MAGIC           "};
+  ZISPluginName pluginName = {.text = "MAGICNUMBER     "};
   ZISPluginNickname pluginNickname = {.text = "M   "};
   ZISPlugin *plugin = zisCreatePlugin(pluginName, pluginNickname,
                                       NULL, NULL, handleCommands,
