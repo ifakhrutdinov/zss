@@ -23,7 +23,18 @@
 #include "zis/plugin.h"
 #include "zis/service.h"
 
-static bool isNameValid(const ZISPluginName *name) {
+static bool isPluginNameValid(const ZISPluginName *name) {
+
+  for (int i = 0; i < sizeof(name->text); i++) {
+    if (!isprint(name->text[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+static bool isServiceNameValid(const ZISServiceName *name) {
 
   for (int i = 0; i < sizeof(name->text); i++) {
     if (!isprint(name->text[i])) {
@@ -74,7 +85,7 @@ ZISPlugin *zisCreatePlugin(ZISPluginName name,
                            unsigned int serviceCount,
                            int flags) {
 
-  if (!isNameValid(&name)) {
+  if (!isPluginNameValid(&name)) {
     return false;
   }
 
@@ -124,6 +135,10 @@ int zisPluginAddService(ZISPlugin *plugin, ZISService service) {
 
   if (isPCCPService && !isLPAPlugin) {
     return RC_ZIS_PLUGIN_INCOMPATIBLE_SEVICE;
+  }
+
+  if (!isServiceNameValid(&service.name)) {
+    return RC_ZIS_PLUGIN_BAD_SERVICE_NAME;
   }
 
   plugin->services[plugin->serviceCount++] = service;

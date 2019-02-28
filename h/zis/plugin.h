@@ -140,6 +140,7 @@ void zisRemovePluginAnchor(ZISPluginAnchor **anchor);
 #define RC_ZIS_PLUGIN_COMMAND_NOT_HADNLED 2
 #define RC_ZIS_PLUGIN_SEVICE_TABLE_FULL   8
 #define RC_ZIS_PLUGIN_INCOMPATIBLE_SEVICE 9
+#define RC_ZIS_PLUGIN_BAD_SERVICE_NAME    10
 
 #endif /* ZIS_PLUGIN_H_ */
 
