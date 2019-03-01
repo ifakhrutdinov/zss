@@ -313,10 +313,11 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
   return RC_ZIS_OK;
 }
 
-static int relocatePluginToLPAIfNeeded(ZISPlugin* plugin,
-                                       ZISPluginAnchor* anchor,
+static int relocatePluginToLPAIfNeeded(ZISPlugin **pluginAddr,
+                                       ZISPluginAnchor *anchor,
                                        EightCharString moduleName) {
 
+  ZISPlugin *plugin = *pluginAddr;
   bool lpaNeeded = plugin->flags & ZIS_PLUGIN_FLAG_LPA ? true : false;
   bool lpaPresent = anchor->flags & ZIS_PLUGIN_ANCHOR_FLAG_LPA ? true : false;
 
@@ -376,7 +377,7 @@ static int relocatePluginToLPAIfNeeded(ZISPlugin* plugin,
     ZISPluginDescriptorFunction *getPluginDescriptor =
         (ZISPluginDescriptorFunction *)((int)ep & 0xFFFFFFFE);
 
-    *plugin = *getPluginDescriptor();
+    *pluginAddr = getPluginDescriptor();
 
   }
 
@@ -441,7 +442,7 @@ static int installPlugin(ZISContext *context, ZISPlugin *plugin,
     context->zisAnchor->firstPlugin = anchor;
   }
 
-  int relocateRC = relocatePluginToLPAIfNeeded(plugin, anchor, moduleName);
+  int relocateRC = relocatePluginToLPAIfNeeded(&plugin, anchor, moduleName);
   if (relocateRC != RC_ZIS_OK) {
     return relocateRC;
   }

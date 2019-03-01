@@ -111,6 +111,7 @@ void zisUpdateServiceAnchor(ZISServiceAnchor *anchor,
                             const struct ZISPlugin_tag *plugin,
                             const ZISService *service) {
 
+  anchor->flags = service->flags;
   anchor->serve = service->serve;
 
 }
