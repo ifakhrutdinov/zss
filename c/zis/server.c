@@ -282,10 +282,6 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
 
     service->anchor = anchor;
 
-    zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_SERVICE_ADDED_MSG,
-            anchor->path.pluginName, anchor->path.serviceName.text,
-            plugin->pluginVersion);
-
     /* Service init call. */
     if (service->init != NULL) {
       int initRC = service->init(context, service, anchor);
@@ -308,6 +304,10 @@ static int installServices(ZISContext *context, ZISPlugin *plugin,
     }
 
     anchor->state |= ZIS_SERVICE_ANCHOR_STATE_ACTIVE;
+
+    zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING, ZIS_LOG_SERVICE_ADDED_MSG,
+            anchor->path.pluginName, anchor->path.serviceName.text,
+            plugin->pluginVersion);
   }
 
   return RC_ZIS_OK;
