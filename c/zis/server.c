@@ -299,7 +299,7 @@ static int callPluginInit(ZISContext *context, ZISPlugin *plugin,
   ABENDInfo abendInfo = {ABEND_INFO_EYECATCHER};
 
   recoveryRC = recoveryPush("callPluginInit",
-                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY,
+                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY | RCVR_FLAG_PRODUCE_DUMP,
                             "callPluginInit", extractABENDInfo, &abendInfo,
                             NULL, NULL);
   {
@@ -340,7 +340,7 @@ static int callPluginTerm(ZISContext *context, ZISPlugin *plugin,
   ABENDInfo abendInfo = {ABEND_INFO_EYECATCHER};
 
   recoveryRC = recoveryPush("callPluginTerm",
-                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY,
+                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY | RCVR_FLAG_PRODUCE_DUMP,
                             "callPluginTerm", extractABENDInfo, &abendInfo,
                             NULL, NULL);
   {
@@ -384,7 +384,7 @@ static int callServiceInit(ZISContext *context, ZISPlugin *plugin,
   ABENDInfo abendInfo = {ABEND_INFO_EYECATCHER};
 
   recoveryRC = recoveryPush("callServiceInit",
-                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY,
+                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY | RCVR_FLAG_PRODUCE_DUMP,
                             "callServiceInit", extractABENDInfo, &abendInfo,
                             NULL, NULL);
   {
@@ -426,7 +426,7 @@ static int callServiceTerm(ZISContext *context, ZISPlugin *plugin,
   ABENDInfo abendInfo = {ABEND_INFO_EYECATCHER};
 
   recoveryRC = recoveryPush("callServiceTerm",
-                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY,
+                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY | RCVR_FLAG_PRODUCE_DUMP,
                             "callServiceTerm", extractABENDInfo, &abendInfo,
                             NULL, NULL);
   {
@@ -712,7 +712,7 @@ static ZISPlugin *tryLoadingPlugin(const char *pluginName,
 
   /* Try executing plugin EP. */
   recoveryRC = recoveryPush("tryLoadingPlugin():exec",
-                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY,
+                            RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY | RCVR_FLAG_PRODUCE_DUMP,
                             "ZIS get plugin", extractABENDInfo, &abendInfo,
                             NULL, NULL);
   {
@@ -723,14 +723,14 @@ static ZISPlugin *tryLoadingPlugin(const char *pluginName,
         zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
                 ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in descriptor not "
                 "received from module '%8.8s'",
-                pluginName, moduleName);
+                pluginName, moduleName.text);
       }
 
     } else {
       zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
               ZIS_LOG_PLUGIN_FAILURE_MSG_PREFIX" plug-in EP not executed, "
               "module '%8.8s', recovery RC = %d, ABEND %03X-%02X",
-              pluginName, moduleName, recoveryRC, abendInfo.completionCode,
+              pluginName, moduleName.text, recoveryRC, abendInfo.completionCode,
               abendInfo.reasonCode);
     }
   }
@@ -762,7 +762,7 @@ static bool isPluginValid(const char *name, const ZISPlugin *plugin) {
   ABENDInfo abendInfo = {ABEND_INFO_EYECATCHER};
 
   int recoveryRC = recoveryPush("isPluginValid()",
-                                RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY,
+                                RCVR_FLAG_RETRY | RCVR_FLAG_DELETE_ON_RETRY | RCVR_FLAG_PRODUCE_DUMP,
                                 "ZIS validate plugin", extractABENDInfo,
                                 &abendInfo, NULL, NULL);
   do {
