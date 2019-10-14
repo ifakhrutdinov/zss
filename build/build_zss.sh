@@ -16,7 +16,7 @@ export _C89_LSYSLIB="CEE.SCEELKED:SYS1.CSSLIB:CSF.SCSFMOD0"
 
 WORKING_DIR=$(dirname "$0")
 ZSS="../.."
-COMMON="../../deps/zowe-common-c"
+COMMON="../../../zowe-common-c"
 
 
 echo "********************************************************************************"
@@ -40,6 +40,7 @@ c89 \
   -DHTTPSERVER_BPX_IMPERSONATION=1 \
   -DAPF_AUTHORIZED=0 \
   -Wc,dll,expo,langlvl\(extc99\),gonum,goff,hgpr,roconst,ASM,asmlib\('CEE.SCEEMAC','SYS1.MACLIB','SYS1.MODGEN'\) \
+  -Wc,agg,exp,list(),so \
   -Wl,ac=1 \
   -I ${COMMON}/h \
   -I ${COMMON}/jwt/jwt \

@@ -16,7 +16,7 @@ export _LD_SYSLIB="//'SYS1.CSSLIB'://'CEE.SCEELKEX'://'CEE.SCEELKED'://'CEE.SCEE
 
 WORKING_DIR=$(dirname "$0")
 ZSS="../.."
-COMMON="../../deps/zowe-common-c"
+COMMON="../../../zowe-common-c"
 
 
 echo "********************************************************************************"
@@ -25,6 +25,8 @@ echo "Building ZIS..."
 mkdir -p "${WORKING_DIR}/tmp-zis" && cd "$_"
 xlc -S -M -qmetal -q64 -DSUBPOOL=132 -DMETTLE=1 -DMSGPREFIX=\"ZWE\" \
   -DRADMIN_XMEM_MODE \
+  -DCMS_LPA_DEV_MODE \
+  -DZIS_LPA_DEV_MODE \
   -qreserved_reg=r12 \
   -Wc,arch\(8\),agg,exp,list\(\),so\(\),off,xref,roconst,longname,lp64 \
   -I ${COMMON}/h -I ${ZSS}/h -I ${ZSS}/zis-aux/include -I ${ZSS}/zis-aux/src \

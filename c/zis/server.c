@@ -572,7 +572,7 @@ static int relocatePluginToLPAIfNeeded(ZISPlugin **pluginAddr,
 
   if (lpaPresent) {
 
-    if (anchor->pluginVersion != plugin->pluginVersion) {
+    if (anchor->pluginVersion != plugin->pluginVersion || TRUE) {
 
       zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_WARNING,
               ZIS_LOG_PLUGIN_VER_MISMATCH_MSG, plugin->name.text,
@@ -590,7 +590,7 @@ static int relocatePluginToLPAIfNeeded(ZISPlugin **pluginAddr,
       if (lpaRC != 0) {
         zowelog(NULL, LOG_COMP_ID_CMS, ZOWE_LOG_SEVERE, ZIS_LOG_LPA_FAILURE_MSG,
                 "DELETE", anchor->moduleInfo.inputInfo.name, lpaRC, lpaRSN);
-        return RC_ZIS_ERROR;
+//        return RC_ZIS_ERROR;
       }
 #endif
       memset(&anchor->moduleInfo, 0, sizeof(anchor->moduleInfo));
