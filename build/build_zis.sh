@@ -25,6 +25,7 @@ echo "Building ZIS..."
 mkdir -p "${WORKING_DIR}/tmp-zis" && cd "$_"
 xlc -S -M -qmetal -q64 -DSUBPOOL=132 -DMETTLE=1 -DMSGPREFIX=\"ZWE\" \
   -DRADMIN_XMEM_MODE \
+  -DRCVR_CPOOL_STATES \
   -DCMS_LPA_DEV_MODE \
   -DZIS_LPA_DEV_MODE \
   -qreserved_reg=r12 \
