@@ -1250,6 +1250,7 @@ static void updateCMServerSettings(ZISContext *context,
       zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
               ZIS_LOG_BAD_CONFIG_PARM_MSG" - \'%s\'",
               ZIS_PARM_PCSS_STACK_POOL_SIZE, stackPoolSizeStr);
+      stackPoolSize = ZIS_PCSS_STACK_POOL_DEFAULT_SIZSE;
     }
   }
 
@@ -1262,6 +1263,7 @@ static void updateCMServerSettings(ZISContext *context,
       zowelog(NULL, LOG_COMP_STCBASE, ZOWE_LOG_WARNING,
               ZIS_LOG_BAD_CONFIG_PARM_MSG" - \'%s\'",
               ZIS_PARM_PCSS_RECOVERY_POOL_SIZE, recoveryPoolSizeStr);
+      recoveryPoolSize = ZIS_PCSS_RECOVERY_POOL_DEFAULT_SIZSE;
     }
   }
 
