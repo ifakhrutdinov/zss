@@ -23,7 +23,6 @@
 //*       OVERRIDE THE DEFAULT SIZE TO ADJUST TO THE NUMBER OF       */
 //*       SIMULTANEOUS PC-SS CALLERS OR SERVICE WITH A LARGE NUMBER  */
 //*       OF RECOVERY STATE.                                         */
-//*     PCSS_STACK_POOL_SIZE -                                       */
 //*       OPTION USED TO CONTROL THE PC ROUTINE SAF CHECK.           */
 //*       IF YES, THE SAF CHECK IS PERFORMED FOR ALL CALLERS.        */
 //*       OTHERWISE, SUPERVISOR CALLERS AND CALLERS RUNNING IN       */
