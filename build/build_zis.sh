@@ -16,7 +16,7 @@ export _LD_SYSLIB="//'SYS1.CSSLIB'://'CEE.SCEELKEX'://'CEE.SCEELKED'://'CEE.SCEE
 
 WORKING_DIR=$(dirname "$0")
 ZSS="../.."
-COMMON="../../../zowe-common-c"
+COMMON="../../deps/zowe-common-c"
 
 
 echo "********************************************************************************"

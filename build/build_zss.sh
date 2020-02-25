@@ -16,7 +16,7 @@ export _C89_LSYSLIB="CEE.SCEELKED:SYS1.CSSLIB:CSF.SCSFMOD0"
 
 WORKING_DIR=$(dirname "$0")
 ZSS="../.."
-COMMON="../../../zowe-common-c"
+COMMON="../../deps/zowe-common-c"
 
 
 echo "********************************************************************************"
