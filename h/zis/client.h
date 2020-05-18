@@ -188,7 +188,7 @@ int zisExtractUserProfiles(const CrossMemoryServerName *serverName,
                            int traceLevel);
 
 extern const char *ZIS_UPRFSRV_SERVICE_RC_DESCRIPTION[];
-extern const char *ZIS_UPRFSRV_WRAPPER_RC_DESCRIPTION[];
+//extern const char *ZIS_UPRFSRV_WRAPPER_RC_DESCRIPTION[];
 
 #define RC_ZIS_SRVC_UPRFSRV_USER_ID_TOO_LONG        (ZIS_MAX_GEN_SRVC_RC + 1)
 #define RC_ZIS_SRVC_UPRFSRV_RESULT_BUFF_NULL        (ZIS_MAX_GEN_SRVC_RC + 2)
@@ -211,8 +211,8 @@ int zisExtractGenresProfiles(const CrossMemoryServerName *serverName,
                              ZISGenresProfileServiceStatus *status,
                              int traceLevel);
 
-extern const char *ZIS_GRPRFSRV_SERVICE_RC_DESCRIPTION[];
-extern const char *ZIS_GRPRFSRV_WRAPPER_RC_DESCRIPTION[];
+//extern const char *ZIS_GRPRFSRV_SERVICE_RC_DESCRIPTION[];
+//extern const char *ZIS_GRPRFSRV_WRAPPER_RC_DESCRIPTION[];
 
 #define RC_ZIS_SRVC_GRPRFSRV_CLASS_TOO_LONG        (ZIS_MAX_GEN_SRVC_RC + 1)
 #define RC_ZIS_SRVC_GRPRFSRV_PROFILE_TOO_LONG      (ZIS_MAX_GEN_SRVC_RC + 2)
@@ -236,8 +236,8 @@ int zisExtractGenresAccessList(const CrossMemoryServerName *serverName,
                                ZISGenresAccessListServiceStatus *status,
                                int traceLevel);
 
-extern const char *ZIS_ACSLSRV_SERVICE_RC_DESCRIPTION[];
-extern const char *ZIS_ACSLSRV_WRAPPER_RC_DESCRIPTION[];
+//extern const char *ZIS_ACSLSRV_SERVICE_RC_DESCRIPTION[];
+//extern const char *ZIS_ACSLSRV_WRAPPER_RC_DESCRIPTION[];
 
 #define RC_ZIS_SRVC_ACSLSRV_CLASS_TOO_LONG          (ZIS_MAX_GEN_SRVC_RC + 1)
 #define RC_ZIS_SRVC_ACSLSRV_PROFILE_NULL            (ZIS_MAX_GEN_SRVC_RC + 2)
@@ -287,8 +287,8 @@ int zisRevokeAccessToProfile(const CrossMemoryServerName *serverName,
                              ZISGenresAdminServiceStatus *status,
                              int traceLevel);
 
-extern const char *ZIS_GSADMNSRV_SERVICE_RC_DESCRIPTION[];
-extern const char *ZIS_GSADMNSRV_WRAPPER_RC_DESCRIPTION[];
+//extern const char *ZIS_GSADMNSRV_SERVICE_RC_DESCRIPTION[];
+//extern const char *ZIS_GSADMNSRV_WRAPPER_RC_DESCRIPTION[];
 
 #define RC_ZIS_SRVC_PADMIN_USERID_NULL            (ZIS_MAX_GEN_SRVC_RC + 1)
 #define RC_ZIS_SRVC_PADMIN_USERID_TOO_LONG        (ZIS_MAX_GEN_SRVC_RC + 2)
@@ -314,8 +314,8 @@ int zisExtractGroupProfiles(const CrossMemoryServerName *serverName,
                             ZISGroupProfileServiceStatus *status,
                             int traceLevel);
 
-extern const char *ZIS_GPPRFSRV_SERVICE_RC_DESCRIPTION[];
-extern const char *ZIS_GPPRFSRV_WRAPPER_RC_DESCRIPTION[];
+//extern const char *ZIS_GPPRFSRV_SERVICE_RC_DESCRIPTION[];
+//extern const char *ZIS_GPPRFSRV_WRAPPER_RC_DESCRIPTION[];
 
 #define RC_ZIS_SRVC_GPPRFSRV_CLASS_TOO_LONG         (ZIS_MAX_GEN_SRVC_RC + 1)
 #define RC_ZIS_SRVC_GPPRFSRV_GROUP_TOO_LONG         (ZIS_MAX_GEN_SRVC_RC + 2)
@@ -338,8 +338,8 @@ int zisExtractGroupAccessList(const CrossMemoryServerName *serverName,
                               ZISGroupAccessListServiceStatus *status,
                               int traceLevel);
 
-extern const char *ZIS_GRPALSRV_SERVICE_RC_DESCRIPTION[];
-extern const char *ZIS_GRPALSRV_WRAPPER_RC_DESCRIPTION[];
+//extern const char *ZIS_GRPALSRV_SERVICE_RC_DESCRIPTION[];
+//extern const char *ZIS_GRPALSRV_WRAPPER_RC_DESCRIPTION[];
 
 #define RC_ZIS_SRVC_GRPALSRV_GROUP_NULL             (ZIS_MAX_GEN_SRVC_RC + 1)
 #define RC_ZIS_SRVC_GRPALSRV_GROUP_TOO_LONG         (ZIS_MAX_GEN_SRVC_RC + 2)
@@ -388,8 +388,8 @@ int zisRemoveFromGroup(const CrossMemoryServerName *serverName,
                        ZISGroupAdminServiceStatus *status,
                        int traceLevel);
 
-extern const char *ZIS_GRPASRV_SERVICE_RC_DESCRIPTION[];
-extern const char *ZIS_GRPASRV_WRAPPER_RC_DESCRIPTION[];
+//extern const char *ZIS_GRPASRV_SERVICE_RC_DESCRIPTION[];
+//extern const char *ZIS_GRPASRV_WRAPPER_RC_DESCRIPTION[];
 
 #define RC_ZIS_SRVC_GADMIN_GROUP_NULL             (ZIS_MAX_GEN_SRVC_RC + 1)
 #define RC_ZIS_SRVC_GADMIN_GROUP_TOO_LONG         (ZIS_MAX_GEN_SRVC_RC + 2)

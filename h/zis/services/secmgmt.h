@@ -94,6 +94,7 @@ ZOWE_PRAGMA_PACK_RESET
 #pragma map(zisUserProfilesServiceFunction, "ZISSXUPR")
 int zisUserProfilesServiceFunction(CrossMemoryServerGlobalArea *globalArea,
                                    CrossMemoryService *service, void *parm);
+#pragma map(validateUserProfileParmList, "ZISUPPL")
 int validateUserProfileParmList(ZISUserProfileServiceParmList *parm);
 
 #define RC_ZIS_UPRFSRV_OK                         0
@@ -146,6 +147,7 @@ ZOWE_PRAGMA_PACK_RESET
 #pragma map(zisGenresProfilesServiceFunction, "ZISSXGRP")
 int zisGenresProfilesServiceFunction(CrossMemoryServerGlobalArea *globalArea,
                                      CrossMemoryService *service, void *parm);
+#pragma map(validateGenresProfileParmList, "ZISGPPL")
 int validateGenresProfileParmList(ZISGenresProfileServiceParmList *parm);
 
 #define RC_ZIS_GRPRFSRV_OK                        0
@@ -201,6 +203,7 @@ ZOWE_PRAGMA_PACK_RESET
 #pragma map(zisGenresAccessListServiceFunction, "ZISSXGAL")
 int zisGenresAccessListServiceFunction(CrossMemoryServerGlobalArea *globalArea,
                                        CrossMemoryService *service, void *parm);
+#pragma map(validateGenresAccessListParmList, "ZISGALP")
 int validateGenresAccessListParmList(ZISGenresAccessListServiceParmList *parm);
 
 #define RC_ZIS_ACSLSRV_OK                         0
@@ -286,6 +289,7 @@ ZOWE_PRAGMA_PACK_RESET
 #pragma map(zisGenresProfileAdminServiceFunction, "ZISSXPAA")
 int zisGenresProfileAdminServiceFunction(CrossMemoryServerGlobalArea *globalArea,
                                          CrossMemoryService *service, void *parm);
+#pragma map(validateGenresParmList, "ZISGPLS")
 int validateGenresParmList(ZISGenresAdminServiceParmList *parmList);
 
 #define RC_ZIS_GSADMNSRV_OK                       0
@@ -345,6 +349,7 @@ ZOWE_PRAGMA_PACK_RESET
 #pragma map(zisGroupProfilesServiceFunction, "ZISSXGPP")
 int zisGroupProfilesServiceFunction(CrossMemoryServerGlobalArea *globalArea,
                                     CrossMemoryService *service, void *parm);
+#pragma map(validateGroupProfileParmList, "ZISGRPL")
 int validateGroupProfileParmList(ZISGroupProfileServiceParmList *parm);
 
 #define RC_ZIS_GPPRFSRV_OK                        0
@@ -398,6 +403,7 @@ ZOWE_PRAGMA_PACK_RESET
 #pragma map(zisGroupAccessListServiceFunction, "ZISSXGPA")
 int zisGroupAccessListServiceFunction(CrossMemoryServerGlobalArea *globalArea,
                                       CrossMemoryService *service, void *parm);
+#pragma map(validateGroupAccessListParmList, "ZISGRAP")
 int validateGroupAccessListParmList(ZISGroupAccessListServiceParmList *parm);
 
 #define RC_ZIS_GRPALSRV_OK                        0
@@ -483,6 +489,7 @@ ZOWE_PRAGMA_PACK_RESET
 #pragma map(zisGroupAdminServiceFunction, "ZISSXPGA")
 int zisGroupAdminServiceFunction(CrossMemoryServerGlobalArea *globalArea,
                                  CrossMemoryService *service, void *parm);
+#pragma map(validateGroupParmList, "ZISGRPR")
 int validateGroupParmList(ZISGroupAdminServiceParmList *parmList);
 
 #define RC_ZIS_GRPASRV_OK                         0
